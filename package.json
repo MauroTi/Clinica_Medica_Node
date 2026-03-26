@@ -1,0 +1,31 @@
+{
+  "name": "clinica_medica_backend",
+  "version": "1.0.0",
+  "description": "Backend da aplicação Clinica Medica com Node.js e MySQL",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "seed": "node scripts/seed.js"
+  },
+  "keywords": [
+    "clinica",
+    "medica",
+    "nodejs",
+    "mysql",
+    "express"
+  ],
+  "author": "Mauro Guterres",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "mysql2": "^3.20.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}
