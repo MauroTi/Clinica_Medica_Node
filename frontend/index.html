@@ -7,74 +7,113 @@
   <link rel="stylesheet" href="./css/style.css" />
 </head>
 <body>
-  <div class="app">
-    <header class="topbar">
-      <div>
-        <h1>Clínica Médica</h1>
-        <p class="subtitle">Sistema de gestão</p>
-      </div>
-      <div class="status-badge">Sistema Online</div>
+  <div class="container">
+    <header class="topo">
+      <h1>🏥 Sistema de Clínica Médica</h1>
+      <p class="subtitulo">Cadastro, consultas, busca e gerenciamento profissional</p>
     </header>
 
-    <section class="dashboard">
-      <div class="card">
-        <h3>Pacientes</h3>
-        <p id="totalPacientes">0</p>
+    <section class="dashboard-grid">
+      <div class="dashboard">
+        <div class="card-dashboard">
+          <span class="card-label">Pacientes</span>
+          <strong id="totalPacientes">0</strong>
+        </div>
+        <div class="card-dashboard">
+          <span class="card-label">Médicos</span>
+          <strong id="totalMedicos">0</strong>
+        </div>
+        <div class="card-dashboard">
+          <span class="card-label">Consultas</span>
+          <strong id="totalConsultas">0</strong>
+        </div>
       </div>
-      <div class="card">
-        <h3>Médicos</h3>
-        <p id="totalMedicos">0</p>
-      </div>
-      <div class="card">
-        <h3>Consultas</h3>
-        <p id="totalConsultas">0</p>
+
+      <div class="card-grafico">
+        <div class="grafico-header">
+          <h2>📊 Distribuição geral</h2>
+          <p>Pizza por volume total de registros</p>
+        </div>
+
+        <div class="grafico-wrapper">
+          <canvas id="graficoPizza" width="280" height="280"></canvas>
+        </div>
+
+        <div class="legenda-grafico">
+          <div class="legenda-item">
+            <span class="legenda-cor cor-pacientes"></span>
+            <span>Pacientes</span>
+          </div>
+          <div class="legenda-item">
+            <span class="legenda-cor cor-medicos"></span>
+            <span>Médicos</span>
+          </div>
+          <div class="legenda-item">
+            <span class="legenda-cor cor-consultas"></span>
+            <span>Consultas</span>
+          </div>
+        </div>
       </div>
     </section>
 
     <nav class="tabs">
-      <button class="tab-btn active" data-tab="pacientes">Pacientes</button>
-      <button class="tab-btn" data-tab="medicos">Médicos</button>
-      <button class="tab-btn" data-tab="consultas">Consultas</button>
+      <button class="tab-btn active" data-tab="pacientes" type="button">Pacientes</button>
+      <button class="tab-btn" data-tab="medicos" type="button">Médicos</button>
+      <button class="tab-btn" data-tab="consultas" type="button">Consultas</button>
     </nav>
 
     <!-- PACIENTES -->
     <section id="tab-pacientes" class="tab-content active">
       <div class="section-header">
-        <div>
-          <h2>Cadastro de Pacientes</h2>
-          <p id="modoPaciente" class="modo-texto">Modo: Cadastro</p>
-        </div>
+        <h2>👤 Pacientes</h2>
+        <span class="modo-badge" id="modoPaciente">Modo: Cadastro</span>
       </div>
 
       <form id="formPaciente" class="form-grid">
-        <input type="hidden" id="pacienteId" />
-
         <div class="form-group">
-          <label for="pacienteNome">Nome</label>
-          <input type="text" id="pacienteNome" required />
+          <label for="nomePaciente">Nome do paciente</label>
+          <input type="text" id="nomePaciente" placeholder="Digite o nome do paciente" required />
         </div>
 
         <div class="form-group">
-          <label for="pacienteIdade">Idade</label>
-          <input type="number" id="pacienteIdade" required />
+          <label for="idadePaciente">Idade</label>
+          <input type="number" id="idadePaciente" placeholder="Digite a idade" required min="0" />
         </div>
 
         <div class="form-group">
-          <label for="pacienteTelefone">Telefone</label>
-          <input type="text" id="pacienteTelefone" required />
+          <label for="telefonePaciente">Telefone</label>
+          <input type="text" id="telefonePaciente" placeholder="Digite o telefone" required />
         </div>
 
         <div class="form-actions">
-          <button type="submit" id="btnSalvarPaciente" class="btn btn-primary">Salvar Paciente</button>
-          <button type="button" id="btnCancelarPaciente" class="btn btn-secondary hidden">Cancelar Edição</button>
+          <button type="submit" id="btnSalvarPaciente">Salvar paciente</button>
+          <button type="button" class="btn-secundario hidden" id="btnCancelarEdicaoPaciente">Cancelar edição</button>
         </div>
       </form>
 
-      <div class="table-card">
+      <div class="toolbar">
+        <div class="toolbar-group">
+          <label for="buscaPaciente" class="sr-only">Buscar pacientes</label>
+          <input type="text" id="buscaPaciente" placeholder="Buscar por nome ou telefone..." />
+        </div>
+
+        <div class="toolbar-group">
+          <label for="ordenacaoPaciente" class="sr-only">Ordenar pacientes</label>
+          <select id="ordenacaoPaciente">
+            <option value="nome-asc">Nome (A-Z)</option>
+            <option value="nome-desc">Nome (Z-A)</option>
+            <option value="idade-asc">Idade (menor → maior)</option>
+            <option value="idade-desc">Idade (maior → menor)</option>
+          </select>
+        </div>
+
+        <button type="button" class="btn-limpar" id="limparFiltroPaciente">Limpar filtros</button>
+      </div>
+
+      <div class="table-wrapper">
         <table>
           <thead>
             <tr>
-              <th>ID</th>
               <th>Nome</th>
               <th>Idade</th>
               <th>Telefone</th>
@@ -84,41 +123,61 @@
           <tbody id="listaPacientes"></tbody>
         </table>
       </div>
+
+      <div class="paginacao">
+        <button type="button" class="btn-secundario" id="btnAnteriorPacientes">Anterior</button>
+        <span id="paginaInfoPacientes" class="pagina-info">Página 1 de 1</span>
+        <button type="button" class="btn-secundario" id="btnProximaPacientes">Próxima</button>
+      </div>
     </section>
 
     <!-- MÉDICOS -->
     <section id="tab-medicos" class="tab-content">
       <div class="section-header">
-        <div>
-          <h2>Cadastro de Médicos</h2>
-          <p id="modoMedico" class="modo-texto">Modo: Cadastro</p>
-        </div>
+        <h2>🩺 Médicos</h2>
+        <span class="modo-badge" id="modoMedico">Modo: Cadastro</span>
       </div>
 
       <form id="formMedico" class="form-grid">
-        <input type="hidden" id="medicoId" />
-
         <div class="form-group">
-          <label for="medicoNome">Nome</label>
-          <input type="text" id="medicoNome" required />
+          <label for="nomeMedico">Nome do médico</label>
+          <input type="text" id="nomeMedico" placeholder="Digite o nome do médico" required />
         </div>
 
         <div class="form-group">
-          <label for="medicoEspecialidade">Especialidade</label>
-          <input type="text" id="medicoEspecialidade" required />
+          <label for="especialidadeMedico">Especialidade</label>
+          <input type="text" id="especialidadeMedico" placeholder="Digite a especialidade" required />
         </div>
 
         <div class="form-actions">
-          <button type="submit" id="btnSalvarMedico" class="btn btn-primary">Salvar Médico</button>
-          <button type="button" id="btnCancelarMedico" class="btn btn-secondary hidden">Cancelar Edição</button>
+          <button type="submit" id="btnSalvarMedico">Salvar médico</button>
+          <button type="button" class="btn-secundario hidden" id="btnCancelarEdicaoMedico">Cancelar edição</button>
         </div>
       </form>
 
-      <div class="table-card">
+      <div class="toolbar">
+        <div class="toolbar-group">
+          <label for="buscaMedico" class="sr-only">Buscar médicos</label>
+          <input type="text" id="buscaMedico" placeholder="Buscar por nome ou especialidade..." />
+        </div>
+
+        <div class="toolbar-group">
+          <label for="ordenacaoMedico" class="sr-only">Ordenar médicos</label>
+          <select id="ordenacaoMedico">
+            <option value="nome-asc">Nome (A-Z)</option>
+            <option value="nome-desc">Nome (Z-A)</option>
+            <option value="esp-asc">Especialidade (A-Z)</option>
+            <option value="esp-desc">Especialidade (Z-A)</option>
+          </select>
+        </div>
+
+        <button type="button" class="btn-limpar" id="limparFiltroMedico">Limpar filtros</button>
+      </div>
+
+      <div class="table-wrapper">
         <table>
           <thead>
             <tr>
-              <th>ID</th>
               <th>Nome</th>
               <th>Especialidade</th>
               <th>Ações</th>
@@ -127,51 +186,75 @@
           <tbody id="listaMedicos"></tbody>
         </table>
       </div>
+
+      <div class="paginacao">
+        <button type="button" class="btn-secundario" id="btnAnteriorMedicos">Anterior</button>
+        <span id="paginaInfoMedicos" class="pagina-info">Página 1 de 1</span>
+        <button type="button" class="btn-secundario" id="btnProximaMedicos">Próxima</button>
+      </div>
     </section>
 
     <!-- CONSULTAS -->
     <section id="tab-consultas" class="tab-content">
       <div class="section-header">
-        <div>
-          <h2>Cadastro de Consultas</h2>
-          <p id="modoConsulta" class="modo-texto">Modo: Cadastro</p>
-        </div>
+        <h2>📅 Consultas</h2>
+        <span class="modo-badge" id="modoConsulta">Modo: Cadastro</span>
       </div>
 
       <form id="formConsulta" class="form-grid">
-        <input type="hidden" id="consultaId" />
-
         <div class="form-group">
-          <label for="consultaPaciente">Paciente</label>
-          <select id="consultaPaciente" required></select>
+          <label for="pacienteConsulta">Paciente</label>
+          <select id="pacienteConsulta" required>
+            <option value="">Selecione o paciente</option>
+          </select>
         </div>
 
         <div class="form-group">
-          <label for="consultaMedico">Médico</label>
-          <select id="consultaMedico" required></select>
+          <label for="medicoConsulta">Médico</label>
+          <select id="medicoConsulta" required>
+            <option value="">Selecione o médico</option>
+          </select>
         </div>
 
         <div class="form-group">
-          <label for="consultaData">Data da Consulta</label>
-          <input type="date" id="consultaData" required />
+          <label for="dataConsulta">Data da consulta</label>
+          <input type="date" id="dataConsulta" required />
         </div>
 
-        <div class="form-group full-width">
-          <label for="consultaDescricao">Descrição</label>
-          <textarea id="consultaDescricao" rows="4" required></textarea>
+        <div class="form-group">
+          <label for="descricaoConsulta">Descrição da consulta</label>
+          <input type="text" id="descricaoConsulta" placeholder="Digite a descrição da consulta" required />
         </div>
 
         <div class="form-actions">
-          <button type="submit" id="btnSalvarConsulta" class="btn btn-primary">Salvar Consulta</button>
-          <button type="button" id="btnCancelarConsulta" class="btn btn-secondary hidden">Cancelar Edição</button>
+          <button type="submit" id="btnSalvarConsulta">Salvar consulta</button>
+          <button type="button" class="btn-secundario hidden" id="btnCancelarEdicaoConsulta">Cancelar edição</button>
         </div>
       </form>
 
-      <div class="table-card">
+      <div class="toolbar">
+        <div class="toolbar-group">
+          <label for="buscaConsulta" class="sr-only">Buscar consultas</label>
+          <input type="text" id="buscaConsulta" placeholder="Buscar por paciente, médico ou descrição..." />
+        </div>
+
+        <div class="toolbar-group">
+          <label for="ordenacaoConsulta" class="sr-only">Ordenar consultas</label>
+          <select id="ordenacaoConsulta">
+            <option value="data-asc">Data (mais antiga → mais nova)</option>
+            <option value="data-desc">Data (mais nova → mais antiga)</option>
+            <option value="paciente-asc">Paciente (A-Z)</option>
+            <option value="medico-asc">Médico (A-Z)</option>
+          </select>
+        </div>
+
+        <button type="button" class="btn-limpar" id="limparFiltroConsulta">Limpar filtros</button>
+      </div>
+
+      <div class="table-wrapper">
         <table>
           <thead>
             <tr>
-              <th>ID</th>
               <th>Paciente</th>
               <th>Médico</th>
               <th>Data</th>
@@ -181,6 +264,12 @@
           </thead>
           <tbody id="listaConsultas"></tbody>
         </table>
+      </div>
+
+      <div class="paginacao">
+        <button type="button" class="btn-secundario" id="btnAnteriorConsultas">Anterior</button>
+        <span id="paginaInfoConsultas" class="pagina-info">Página 1 de 1</span>
+        <button type="button" class="btn-secundario" id="btnProximaConsultas">Próxima</button>
       </div>
     </section>
   </div>

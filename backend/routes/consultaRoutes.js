@@ -4,7 +4,7 @@ import {
   getConsultaPorId,
   postConsulta,
   putConsulta,
-  deleteConsulta
+  deleteConsulta,
 } from '../controllers/consultaController.js';
 
 const router = express.Router();

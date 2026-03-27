@@ -9,6 +9,9 @@ import pacienteRoutes from './backend/routes/pacienteRoutes.js';
 import medicoRoutes from './backend/routes/medicoRoutes.js';
 import consultaRoutes from './backend/routes/consultaRoutes.js';
 
+import notFoundMiddleware from './backend/middlewares/notFoundMiddleware.js';
+import errorMiddleware from './backend/middlewares/errorMiddleware.js';
+
 dotenv.config();
 
 const app = express();
@@ -34,24 +37,8 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'frontend', 'index.html'));
 });
 
-// Middleware para rota não encontrada (404)
-app.use((req, res) => {
-  res.status(404).json({
-    mensagem: `Rota não encontrada: ${req.method} ${req.originalUrl}`
-  });
-});
-
-// Middleware global de erro
-function errorMiddleware(error, req, res, next) {
-  console.error('❌ Erro capturado pelo middleware global:', error);
-
-  const statusCode = error.statusCode || 500;
-
-  res.status(statusCode).json({
-    mensagem: error.message || 'Erro interno do servidor.'
-  });
-}
-
+// MIDDLEWARES GLOBAIS
+app.use(notFoundMiddleware);
 app.use(errorMiddleware);
 
 app.listen(PORT, () => {

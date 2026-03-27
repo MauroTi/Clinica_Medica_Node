@@ -3,42 +3,41 @@ import {
   buscarConsultaPorId,
   criarConsulta,
   atualizarConsulta,
-  deletarConsulta
+  deletarConsulta,
 } from '../models/consultaModel.js';
 
-export async function getConsultas(req, res) {
+export async function getConsultas(req, res, next) {
   try {
     const consultas = await listarConsultas();
-    res.status(200).json(consultas);
+    return res.status(200).json(consultas);
   } catch (error) {
-    console.error('Erro ao listar consultas:', error);
-    res.status(500).json({ erro: 'Erro ao listar consultas' });
+    next(error);
   }
 }
 
-export async function getConsultaPorId(req, res) {
+export async function getConsultaPorId(req, res, next) {
   try {
     const { id } = req.params;
+
     const consulta = await buscarConsultaPorId(id);
 
     if (!consulta) {
-      return res.status(404).json({ erro: 'Consulta não encontrada' });
+      return res.status(404).json({ mensagem: 'Consulta não encontrada.' });
     }
 
-    res.status(200).json(consulta);
+    return res.status(200).json(consulta);
   } catch (error) {
-    console.error('Erro ao buscar consulta:', error);
-    res.status(500).json({ erro: 'Erro ao buscar consulta' });
+    next(error);
   }
 }
 
-export async function postConsulta(req, res) {
+export async function postConsulta(req, res, next) {
   try {
     const { paciente_id, medico_id, data_consulta, descricao } = req.body;
 
-    if (!paciente_id || !medico_id || !data_consulta || descricao === undefined) {
+    if (!paciente_id || !medico_id || !data_consulta) {
       return res.status(400).json({
-        erro: 'Paciente, médico, data da consulta e descrição são obrigatórios'
+        mensagem: 'Os campos paciente_id, medico_id e data_consulta são obrigatórios.',
       });
     }
 
@@ -49,25 +48,27 @@ export async function postConsulta(req, res) {
       descricao
     );
 
-    res.status(201).json(novaConsulta);
+    return res.status(201).json({
+      mensagem: 'Consulta cadastrada com sucesso.',
+      consulta: novaConsulta,
+    });
   } catch (error) {
-    console.error('Erro ao cadastrar consulta:', error);
-    res.status(500).json({ erro: 'Erro ao cadastrar consulta' });
+    next(error);
   }
 }
 
-export async function putConsulta(req, res) {
+export async function putConsulta(req, res, next) {
   try {
     const { id } = req.params;
     const { paciente_id, medico_id, data_consulta, descricao } = req.body;
 
-    if (!paciente_id || !medico_id || !data_consulta || descricao === undefined) {
+    if (!paciente_id || !medico_id || !data_consulta) {
       return res.status(400).json({
-        erro: 'Paciente, médico, data da consulta e descrição são obrigatórios'
+        mensagem: 'Os campos paciente_id, medico_id e data_consulta são obrigatórios.',
       });
     }
 
-    const afetados = await atualizarConsulta(
+    const consultaAtualizada = await atualizarConsulta(
       id,
       paciente_id,
       medico_id,
@@ -75,31 +76,33 @@ export async function putConsulta(req, res) {
       descricao
     );
 
-    if (afetados === 0) {
-      return res.status(404).json({ erro: 'Consulta não encontrada' });
+    if (!consultaAtualizada) {
+      return res.status(404).json({ mensagem: 'Consulta não encontrada.' });
     }
 
-    const consultaAtualizada = await buscarConsultaPorId(id);
-    res.status(200).json(consultaAtualizada);
+    return res.status(200).json({
+      mensagem: 'Consulta atualizada com sucesso.',
+      consulta: consultaAtualizada,
+    });
   } catch (error) {
-    console.error('Erro ao atualizar consulta:', error);
-    res.status(500).json({ erro: 'Erro ao atualizar consulta' });
+    next(error);
   }
 }
 
-export async function deleteConsulta(req, res) {
+export async function deleteConsulta(req, res, next) {
   try {
     const { id } = req.params;
 
-    const afetados = await deletarConsulta(id);
+    const removida = await deletarConsulta(id);
 
-    if (afetados === 0) {
-      return res.status(404).json({ erro: 'Consulta não encontrada' });
+    if (!removida) {
+      return res.status(404).json({ mensagem: 'Consulta não encontrada.' });
     }
 
-    res.status(200).json({ mensagem: 'Consulta excluída com sucesso' });
+    return res.status(200).json({
+      mensagem: 'Consulta excluída com sucesso.',
+    });
   } catch (error) {
-    console.error('Erro ao excluir consulta:', error);
-    res.status(500).json({ erro: 'Erro ao excluir consulta' });
+    next(error);
   }
 }

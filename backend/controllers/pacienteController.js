@@ -6,91 +6,85 @@ import {
   deletarPaciente
 } from '../models/pacienteModel.js';
 
-export async function getPacientes(req, res) {
+export async function getPacientes(req, res, next) {
   try {
     const pacientes = await listarPacientes();
     res.status(200).json(pacientes);
   } catch (error) {
-    console.error('Erro ao listar pacientes:', error);
-    res.status(500).json({ erro: 'Erro ao listar pacientes' });
+    next(error);
   }
 }
 
-export async function getPacientePorId(req, res) {
+export async function getPacientePorId(req, res, next) {
   try {
     const { id } = req.params;
     const paciente = await buscarPacientePorId(id);
 
     if (!paciente) {
-      return res.status(404).json({ erro: 'Paciente não encontrado' });
+      return res.status(404).json({ mensagem: 'Paciente não encontrado' });
     }
 
     res.status(200).json(paciente);
   } catch (error) {
-    console.error('Erro ao buscar paciente:', error);
-    res.status(500).json({ erro: 'Erro ao buscar paciente' });
+    next(error);
   }
 }
 
-export async function postPaciente(req, res) {
+export async function postPaciente(req, res, next) {
   try {
     const { nome, idade, telefone } = req.body;
 
     if (!nome || idade === undefined || !telefone) {
-      return res.status(400).json({ erro: 'Nome, idade e telefone são obrigatórios' });
+      return res.status(400).json({
+        mensagem: 'Nome, idade e telefone são obrigatórios'
+      });
     }
 
     const novoPaciente = await criarPaciente(nome, idade, telefone);
     res.status(201).json(novoPaciente);
   } catch (error) {
-    console.error('Erro ao cadastrar paciente:', error);
-    res.status(500).json({ erro: 'Erro ao cadastrar paciente' });
+    next(error);
   }
 }
 
-export async function putPaciente(req, res) {
+export async function putPaciente(req, res, next) {
   try {
     const { id } = req.params;
     const { nome, idade, telefone } = req.body;
 
     if (!nome || idade === undefined || !telefone) {
-      return res.status(400).json({ erro: 'Nome, idade e telefone são obrigatórios' });
+      return res.status(400).json({
+        mensagem: 'Nome, idade e telefone são obrigatórios'
+      });
     }
 
     const afetados = await atualizarPaciente(id, nome, idade, telefone);
 
     if (afetados === 0) {
-      return res.status(404).json({ erro: 'Paciente não encontrado' });
+      return res.status(404).json({ mensagem: 'Paciente não encontrado' });
     }
 
     const pacienteAtualizado = await buscarPacientePorId(id);
     res.status(200).json(pacienteAtualizado);
   } catch (error) {
-    console.error('Erro ao atualizar paciente:', error);
-    res.status(500).json({ erro: 'Erro ao atualizar paciente' });
+    next(error);
   }
 }
 
-export async function deletePaciente(req, res) {
+export async function deletePaciente(req, res, next) {
   try {
     const { id } = req.params;
 
     const afetados = await deletarPaciente(id);
 
     if (afetados === 0) {
-      return res.status(404).json({ erro: 'Paciente não encontrado' });
+      return res.status(404).json({ mensagem: 'Paciente não encontrado' });
     }
 
-    res.status(200).json({ mensagem: 'Paciente excluído com sucesso' });
+    res.status(200).json({
+      mensagem: 'Paciente excluído com sucesso. Consultas vinculadas foram removidas automaticamente.'
+    });
   } catch (error) {
-    console.error('Erro ao excluir paciente:', error);
-
-    if (error.code === 'ER_ROW_IS_REFERENCED_2') {
-      return res.status(400).json({
-        erro: 'Não é possível excluir este paciente porque ele possui consultas vinculadas'
-      });
-    }
-
-    res.status(500).json({ erro: 'Erro ao excluir paciente' });
+    next(error);
   }
 }

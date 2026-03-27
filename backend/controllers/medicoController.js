@@ -1,96 +1,97 @@
 import {
-  listarPacientes,
-  buscarPacientePorId,
-  criarPaciente,
-  atualizarPaciente,
-  deletarPaciente
-} from '../models/pacienteModel.js';
+  listarMedicos,
+  buscarMedicoPorId,
+  criarMedico,
+  atualizarMedico,
+  deletarMedico,
+} from '../models/medicoModel.js';
 
-export async function getPacientes(req, res) {
+export async function getMedicos(req, res, next) {
   try {
-    const pacientes = await listarPacientes();
-    res.status(200).json(pacientes);
+    const medicos = await listarMedicos();
+    return res.status(200).json(medicos);
   } catch (error) {
-    console.error('Erro ao listar pacientes:', error);
-    res.status(500).json({ erro: 'Erro ao listar pacientes' });
+    next(error);
   }
 }
 
-export async function getPacientePorId(req, res) {
-  try {
-    const { id } = req.params;
-    const paciente = await buscarPacientePorId(id);
-
-    if (!paciente) {
-      return res.status(404).json({ erro: 'Paciente não encontrado' });
-    }
-
-    res.status(200).json(paciente);
-  } catch (error) {
-    console.error('Erro ao buscar paciente:', error);
-    res.status(500).json({ erro: 'Erro ao buscar paciente' });
-  }
-}
-
-export async function postPaciente(req, res) {
-  try {
-    const { nome, idade, telefone } = req.body;
-
-    if (!nome || idade === undefined || !telefone) {
-      return res.status(400).json({ erro: 'Nome, idade e telefone são obrigatórios' });
-    }
-
-    const novoPaciente = await criarPaciente(nome, idade, telefone);
-    res.status(201).json(novoPaciente);
-  } catch (error) {
-    console.error('Erro ao cadastrar paciente:', error);
-    res.status(500).json({ erro: 'Erro ao cadastrar paciente' });
-  }
-}
-
-export async function putPaciente(req, res) {
-  try {
-    const { id } = req.params;
-    const { nome, idade, telefone } = req.body;
-
-    if (!nome || idade === undefined || !telefone) {
-      return res.status(400).json({ erro: 'Nome, idade e telefone são obrigatórios' });
-    }
-
-    const afetados = await atualizarPaciente(id, nome, idade, telefone);
-
-    if (afetados === 0) {
-      return res.status(404).json({ erro: 'Paciente não encontrado' });
-    }
-
-    const pacienteAtualizado = await buscarPacientePorId(id);
-    res.status(200).json(pacienteAtualizado);
-  } catch (error) {
-    console.error('Erro ao atualizar paciente:', error);
-    res.status(500).json({ erro: 'Erro ao atualizar paciente' });
-  }
-}
-
-export async function deletePaciente(req, res) {
+export async function getMedicoPorId(req, res, next) {
   try {
     const { id } = req.params;
 
-    const afetados = await deletarPaciente(id);
+    const medico = await buscarMedicoPorId(id);
 
-    if (afetados === 0) {
-      return res.status(404).json({ erro: 'Paciente não encontrado' });
+    if (!medico) {
+      return res.status(404).json({ mensagem: 'Médico não encontrado.' });
     }
 
-    res.status(200).json({ mensagem: 'Paciente excluído com sucesso' });
+    return res.status(200).json(medico);
   } catch (error) {
-    console.error('Erro ao excluir paciente:', error);
+    next(error);
+  }
+}
 
-    if (error.code === 'ER_ROW_IS_REFERENCED_2') {
+export async function postMedico(req, res, next) {
+  try {
+    const { nome, especialidade } = req.body;
+
+    if (!nome || !especialidade) {
       return res.status(400).json({
-        erro: 'Não é possível excluir este paciente porque ele possui consultas vinculadas'
+        mensagem: 'Os campos nome e especialidade são obrigatórios.',
       });
     }
 
-    res.status(500).json({ erro: 'Erro ao excluir paciente' });
+    const novoMedico = await criarMedico(nome, especialidade);
+
+    return res.status(201).json({
+      mensagem: 'Médico cadastrado com sucesso.',
+      medico: novoMedico,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function putMedico(req, res, next) {
+  try {
+    const { id } = req.params;
+    const { nome, especialidade } = req.body;
+
+    if (!nome || !especialidade) {
+      return res.status(400).json({
+        mensagem: 'Os campos nome e especialidade são obrigatórios.',
+      });
+    }
+
+    const medicoAtualizado = await atualizarMedico(id, nome, especialidade);
+
+    if (!medicoAtualizado) {
+      return res.status(404).json({ mensagem: 'Médico não encontrado.' });
+    }
+
+    return res.status(200).json({
+      mensagem: 'Médico atualizado com sucesso.',
+      medico: medicoAtualizado,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function deleteMedico(req, res, next) {
+  try {
+    const { id } = req.params;
+
+    const removido = await deletarMedico(id);
+
+    if (!removido) {
+      return res.status(404).json({ mensagem: 'Médico não encontrado.' });
+    }
+
+    return res.status(200).json({
+      mensagem: 'Médico excluído com sucesso.',
+    });
+  } catch (error) {
+    next(error);
   }
 }

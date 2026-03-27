@@ -4,7 +4,7 @@ import {
   getMedicoPorId,
   postMedico,
   putMedico,
-  deleteMedico
+  deleteMedico,
 } from '../controllers/medicoController.js';
 
 const router = express.Router();

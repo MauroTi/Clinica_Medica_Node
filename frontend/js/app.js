@@ -1,585 +1,1014 @@
 const API_BASE = 'http://localhost:3000/api';
+const ITENS_POR_PAGINA = 10;
 
-const el = {
-  // Dashboard
-  totalPacientes: document.getElementById('totalPacientes'),
-  totalMedicos: document.getElementById('totalMedicos'),
-  totalConsultas: document.getElementById('totalConsultas'),
-
-  // Tabs
-  tabButtons: document.querySelectorAll('.tab-btn'),
-  tabContents: document.querySelectorAll('.tab-content'),
-
-  // Pacientes
-  formPaciente: document.getElementById('formPaciente'),
-  pacienteId: document.getElementById('pacienteId'),
-  pacienteNome: document.getElementById('pacienteNome'),
-  pacienteIdade: document.getElementById('pacienteIdade'),
-  pacienteTelefone: document.getElementById('pacienteTelefone'),
-  listaPacientes: document.getElementById('listaPacientes'),
-  modoPaciente: document.getElementById('modoPaciente'),
-  btnSalvarPaciente: document.getElementById('btnSalvarPaciente'),
-  btnCancelarPaciente: document.getElementById('btnCancelarPaciente'),
-
-  // Médicos
-  formMedico: document.getElementById('formMedico'),
-  medicoId: document.getElementById('medicoId'),
-  medicoNome: document.getElementById('medicoNome'),
-  medicoEspecialidade: document.getElementById('medicoEspecialidade'),
-  listaMedicos: document.getElementById('listaMedicos'),
-  modoMedico: document.getElementById('modoMedico'),
-  btnSalvarMedico: document.getElementById('btnSalvarMedico'),
-  btnCancelarMedico: document.getElementById('btnCancelarMedico'),
-
-  // Consultas
-  formConsulta: document.getElementById('formConsulta'),
-  consultaId: document.getElementById('consultaId'),
-  consultaPaciente: document.getElementById('consultaPaciente'),
-  consultaMedico: document.getElementById('consultaMedico'),
-  consultaData: document.getElementById('consultaData'),
-  consultaDescricao: document.getElementById('consultaDescricao'),
-  listaConsultas: document.getElementById('listaConsultas'),
-  modoConsulta: document.getElementById('modoConsulta'),
-  btnSalvarConsulta: document.getElementById('btnSalvarConsulta'),
-  btnCancelarConsulta: document.getElementById('btnCancelarConsulta'),
-
-  // Toast
-  toastContainer: document.getElementById('toastContainer')
-};
-
-let estado = {
+const estado = {
   pacientes: [],
   medicos: [],
-  consultas: []
+  consultas: [],
+  edicao: {
+    pacienteId: null,
+    medicoId: null,
+    consultaId: null
+  },
+  filtros: {
+    pacientes: {
+      busca: localStorage.getItem('filtro_paciente_busca') || '',
+      ordenacao: localStorage.getItem('filtro_paciente_ordenacao') || 'nome-asc'
+    },
+    medicos: {
+      busca: localStorage.getItem('filtro_medico_busca') || '',
+      ordenacao: localStorage.getItem('filtro_medico_ordenacao') || 'nome-asc'
+    },
+    consultas: {
+      busca: localStorage.getItem('filtro_consulta_busca') || '',
+      ordenacao: localStorage.getItem('filtro_consulta_ordenacao') || 'data-asc'
+    }
+  },
+  paginacao: {
+    pacientes: 1,
+    medicos: 1,
+    consultas: 1
+  },
+  graficoPizza: null
 };
 
-// ====================
-// UTILITÁRIOS API
-// ====================
+// =========================
+// ELEMENTOS
+// =========================
+const tabs = document.querySelectorAll('.tab-btn');
+const tabContents = document.querySelectorAll('.tab-content');
 
-async function tratarResposta(response) {
-  const data = await response.json().catch(() => ({}));
+const totalPacientes = document.getElementById('totalPacientes');
+const totalMedicos = document.getElementById('totalMedicos');
+const totalConsultas = document.getElementById('totalConsultas');
+const graficoPizzaCanvas = document.getElementById('graficoPizza');
 
-  if (!response.ok) {
-    throw new Error(data.erro || 'Erro na requisição');
-  }
+const formPaciente = document.getElementById('formPaciente');
+const nomePaciente = document.getElementById('nomePaciente');
+const idadePaciente = document.getElementById('idadePaciente');
+const telefonePaciente = document.getElementById('telefonePaciente');
+const btnSalvarPaciente = document.getElementById('btnSalvarPaciente');
+const btnCancelarEdicaoPaciente = document.getElementById('btnCancelarEdicaoPaciente');
+const modoPaciente = document.getElementById('modoPaciente');
+const listaPacientes = document.getElementById('listaPacientes');
+const buscaPaciente = document.getElementById('buscaPaciente');
+const ordenacaoPaciente = document.getElementById('ordenacaoPaciente');
+const limparFiltroPaciente = document.getElementById('limparFiltroPaciente');
+const paginaInfoPacientes = document.getElementById('paginaInfoPacientes');
+const btnAnteriorPacientes = document.getElementById('btnAnteriorPacientes');
+const btnProximaPacientes = document.getElementById('btnProximaPacientes');
 
-  return data;
-}
+const formMedico = document.getElementById('formMedico');
+const nomeMedico = document.getElementById('nomeMedico');
+const especialidadeMedico = document.getElementById('especialidadeMedico');
+const btnSalvarMedico = document.getElementById('btnSalvarMedico');
+const btnCancelarEdicaoMedico = document.getElementById('btnCancelarEdicaoMedico');
+const modoMedico = document.getElementById('modoMedico');
+const listaMedicos = document.getElementById('listaMedicos');
+const buscaMedico = document.getElementById('buscaMedico');
+const ordenacaoMedico = document.getElementById('ordenacaoMedico');
+const limparFiltroMedico = document.getElementById('limparFiltroMedico');
+const paginaInfoMedicos = document.getElementById('paginaInfoMedicos');
+const btnAnteriorMedicos = document.getElementById('btnAnteriorMedicos');
+const btnProximaMedicos = document.getElementById('btnProximaMedicos');
 
-async function apiGet(url) {
-  const response = await fetch(url);
-  return tratarResposta(response);
-}
+const formConsulta = document.getElementById('formConsulta');
+const pacienteConsulta = document.getElementById('pacienteConsulta');
+const medicoConsulta = document.getElementById('medicoConsulta');
+const dataConsulta = document.getElementById('dataConsulta');
+const descricaoConsulta = document.getElementById('descricaoConsulta');
+const btnSalvarConsulta = document.getElementById('btnSalvarConsulta');
+const btnCancelarEdicaoConsulta = document.getElementById('btnCancelarEdicaoConsulta');
+const modoConsulta = document.getElementById('modoConsulta');
+const listaConsultas = document.getElementById('listaConsultas');
+const buscaConsulta = document.getElementById('buscaConsulta');
+const ordenacaoConsulta = document.getElementById('ordenacaoConsulta');
+const limparFiltroConsulta = document.getElementById('limparFiltroConsulta');
+const paginaInfoConsultas = document.getElementById('paginaInfoConsultas');
+const btnAnteriorConsultas = document.getElementById('btnAnteriorConsultas');
+const btnProximaConsultas = document.getElementById('btnProximaConsultas');
 
-async function apiPost(url, body) {
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  });
+const toastContainer = document.getElementById('toastContainer');
 
-  return tratarResposta(response);
-}
-
-async function apiPut(url, body) {
-  const response = await fetch(url, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  });
-
-  return tratarResposta(response);
-}
-
-async function apiDelete(url) {
-  const response = await fetch(url, {
-    method: 'DELETE'
-  });
-
-  return tratarResposta(response);
-}
-
-// ====================
-// MENSAGENS
-// ====================
-
-function mostrarMensagem(texto, tipo = 'success') {
+// =========================
+// UTILITÁRIOS
+// =========================
+function mostrarToast(mensagem, tipo = 'success') {
   const toast = document.createElement('div');
   toast.className = `toast ${tipo}`;
-  toast.textContent = texto;
-
-  el.toastContainer.appendChild(toast);
+  toast.textContent = mensagem;
+  toastContainer.appendChild(toast);
 
   setTimeout(() => {
     toast.remove();
   }, 3000);
 }
 
-// ====================
-// TABS
-// ====================
-
-function alternarAbas() {
-  el.tabButtons.forEach((button) => {
-    button.addEventListener('click', () => {
-      const tab = button.dataset.tab;
-
-      el.tabButtons.forEach((btn) => btn.classList.remove('active'));
-      el.tabContents.forEach((content) => content.classList.remove('active'));
-
-      button.classList.add('active');
-      document.getElementById(`tab-${tab}`).classList.add('active');
-    });
-  });
+function salvarFiltro(chave, valor) {
+  localStorage.setItem(chave, valor);
 }
 
-// ====================
-// FORMATOS
-// ====================
+function formatarData(dataISO) {
+  if (!dataISO) return '-';
 
-function formatarDataParaBanco(data) {
-  return data;
-}
+  const data = new Date(dataISO);
 
-function formatarDataParaInput(data) {
-  if (!data) return '';
-  return String(data).slice(0, 10);
-}
-
-// ====================
-// DASHBOARD
-// ====================
-
-function atualizarDashboard() {
-  el.totalPacientes.textContent = estado.pacientes.length;
-  el.totalMedicos.textContent = estado.medicos.length;
-  el.totalConsultas.textContent = estado.consultas.length;
-}
-
-// ====================
-// PACIENTES
-// ====================
-
-async function carregarPacientes() {
-  estado.pacientes = await apiGet(`${API_BASE}/pacientes`);
-  renderPacientes();
-  preencherSelectPacientes();
-  atualizarDashboard();
-}
-
-function renderPacientes() {
-  el.listaPacientes.innerHTML = '';
-
-  if (estado.pacientes.length === 0) {
-    el.listaPacientes.innerHTML = `
-      <tr>
-        <td colspan="5">Nenhum paciente cadastrado.</td>
-      </tr>
-    `;
-    return;
+  if (isNaN(data.getTime())) {
+    return dataISO;
   }
 
-  estado.pacientes.forEach((paciente) => {
-    const tr = document.createElement('tr');
+  return data.toLocaleDateString('pt-BR');
+}
 
-    tr.innerHTML = `
-      <td>${paciente.id}</td>
-      <td>${paciente.nome}</td>
-      <td>${paciente.idade}</td>
-      <td>${paciente.telefone}</td>
-      <td>
-        <button class="btn btn-edit" data-action="editar-paciente" data-id="${paciente.id}">Editar</button>
-        <button class="btn btn-delete" data-action="excluir-paciente" data-id="${paciente.id}">Excluir</button>
-      </td>
-    `;
+function obterNomePaciente(item) {
+  if (item.paciente_nome) return item.paciente_nome;
+  if (item.nome_paciente) return item.nome_paciente;
 
-    el.listaPacientes.appendChild(tr);
+  const paciente = estado.pacientes.find(p => p.id == item.paciente_id);
+  return paciente ? paciente.nome : 'Paciente não encontrado';
+}
+
+function obterNomeMedico(item) {
+  if (item.medico_nome) return item.medico_nome;
+  if (item.nome_medico) return item.nome_medico;
+
+  const medico = estado.medicos.find(m => m.id == item.medico_id);
+  return medico ? medico.nome : 'Médico não encontrado';
+}
+
+function atualizarControlesPaginacao(tipo, totalItens) {
+  const totalPaginas = Math.max(1, Math.ceil(totalItens / ITENS_POR_PAGINA));
+
+  if (estado.paginacao[tipo] > totalPaginas) {
+    estado.paginacao[tipo] = totalPaginas;
+  }
+
+  if (estado.paginacao[tipo] < 1) {
+    estado.paginacao[tipo] = 1;
+  }
+
+  const paginaAtual = estado.paginacao[tipo];
+
+  if (tipo === 'pacientes') {
+    paginaInfoPacientes.textContent = `Página ${paginaAtual} de ${totalPaginas}`;
+    btnAnteriorPacientes.disabled = paginaAtual <= 1;
+    btnProximaPacientes.disabled = paginaAtual >= totalPaginas;
+  }
+
+  if (tipo === 'medicos') {
+    paginaInfoMedicos.textContent = `Página ${paginaAtual} de ${totalPaginas}`;
+    btnAnteriorMedicos.disabled = paginaAtual <= 1;
+    btnProximaMedicos.disabled = paginaAtual >= totalPaginas;
+  }
+
+  if (tipo === 'consultas') {
+    paginaInfoConsultas.textContent = `Página ${paginaAtual} de ${totalPaginas}`;
+    btnAnteriorConsultas.disabled = paginaAtual <= 1;
+    btnProximaConsultas.disabled = paginaAtual >= totalPaginas;
+  }
+}
+
+function obterPagina(lista, tipo) {
+  const paginaAtual = estado.paginacao[tipo];
+  const inicio = (paginaAtual - 1) * ITENS_POR_PAGINA;
+  const fim = inicio + ITENS_POR_PAGINA;
+
+  atualizarControlesPaginacao(tipo, lista.length);
+
+  return lista.slice(inicio, fim);
+}
+
+function irParaPaginaAnterior(tipo) {
+  if (estado.paginacao[tipo] > 1) {
+    estado.paginacao[tipo]--;
+    rerenderPorTipo(tipo);
+  }
+}
+
+function irParaProximaPagina(tipo, totalItens) {
+  const totalPaginas = Math.max(1, Math.ceil(totalItens / ITENS_POR_PAGINA));
+
+  if (estado.paginacao[tipo] < totalPaginas) {
+    estado.paginacao[tipo]++;
+    rerenderPorTipo(tipo);
+  }
+}
+
+function resetarPagina(tipo) {
+  estado.paginacao[tipo] = 1;
+}
+
+function rerenderPorTipo(tipo) {
+  if (tipo === 'pacientes') renderizarPacientes();
+  if (tipo === 'medicos') renderizarMedicos();
+  if (tipo === 'consultas') renderizarConsultas();
+}
+
+// =========================
+// TABS + PERSISTÊNCIA
+// =========================
+function ativarTab(tabName) {
+  tabs.forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tab === tabName);
   });
+
+  tabContents.forEach(content => {
+    content.classList.toggle('active', content.id === `tab-${tabName}`);
+  });
+
+  localStorage.setItem('aba_ativa_clinica', tabName);
+}
+
+tabs.forEach(btn => {
+  btn.addEventListener('click', () => {
+    ativarTab(btn.dataset.tab);
+  });
+});
+
+function restaurarTabAtiva() {
+  const abaSalva = localStorage.getItem('aba_ativa_clinica') || 'pacientes';
+  ativarTab(abaSalva);
+}
+
+// =========================
+// API
+// =========================
+async function apiFetch(url, options = {}) {
+  const response = await fetch(url, options);
+
+  if (!response.ok) {
+    let erro = 'Erro na requisição';
+
+    try {
+      const data = await response.json();
+      erro = data.erro || data.mensagem || data.message || erro;
+    } catch {
+      // ignora parse
+    }
+
+    throw new Error(erro);
+  }
+
+  if (response.status === 204) return null;
+
+  return response.json();
+}
+
+// =========================
+// PACIENTES
+// =========================
+async function carregarPacientes() {
+  estado.pacientes = await apiFetch(`${API_BASE}/pacientes`);
+  atualizarDashboard();
+  preencherSelectPacientes();
+  renderizarPacientes();
 }
 
 function preencherSelectPacientes() {
-  el.consultaPaciente.innerHTML = '<option value="">Selecione um paciente</option>';
+  const valorAtual = pacienteConsulta.value;
 
-  estado.pacientes.forEach((paciente) => {
+  pacienteConsulta.innerHTML = '<option value="">Selecione o paciente</option>';
+
+  estado.pacientes.forEach(paciente => {
     const option = document.createElement('option');
     option.value = paciente.id;
-    option.textContent = `${paciente.id} - ${paciente.nome}`;
-    el.consultaPaciente.appendChild(option);
+    option.textContent = paciente.nome;
+    pacienteConsulta.appendChild(option);
+  });
+
+  if ([...pacienteConsulta.options].some(opt => opt.value === valorAtual)) {
+    pacienteConsulta.value = valorAtual;
+  }
+}
+
+function obterPacientesFiltrados() {
+  let lista = [...estado.pacientes];
+  const busca = estado.filtros.pacientes.busca.toLowerCase().trim();
+  const ordenacao = estado.filtros.pacientes.ordenacao;
+
+  if (busca) {
+    lista = lista.filter(p =>
+      (p.nome || '').toLowerCase().includes(busca) ||
+      String(p.telefone || '').toLowerCase().includes(busca)
+    );
+  }
+
+  switch (ordenacao) {
+    case 'nome-asc':
+      lista.sort((a, b) => a.nome.localeCompare(b.nome));
+      break;
+    case 'nome-desc':
+      lista.sort((a, b) => b.nome.localeCompare(a.nome));
+      break;
+    case 'idade-asc':
+      lista.sort((a, b) => Number(a.idade) - Number(b.idade));
+      break;
+    case 'idade-desc':
+      lista.sort((a, b) => Number(b.idade) - Number(a.idade));
+      break;
+  }
+
+  return lista;
+}
+
+function renderizarPacientes() {
+  const pacientesFiltrados = obterPacientesFiltrados();
+  const pacientesPagina = obterPagina(pacientesFiltrados, 'pacientes');
+
+  listaPacientes.innerHTML = '';
+
+  if (!pacientesFiltrados.length) {
+    listaPacientes.innerHTML = `
+      <tr>
+        <td colspan="4" class="vazio">Nenhum paciente encontrado.</td>
+      </tr>
+    `;
+    atualizarControlesPaginacao('pacientes', 0);
+    return;
+  }
+
+  pacientesPagina.forEach(paciente => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${paciente.nome}</td>
+      <td>${paciente.idade ?? '-'}</td>
+      <td>${paciente.telefone || '-'}</td>
+      <td>
+        <div class="acoes">
+          <button class="btn-editar" data-id="${paciente.id}" data-tipo="paciente">Editar</button>
+          <button class="btn-excluir" data-id="${paciente.id}" data-tipo="paciente">Excluir</button>
+        </div>
+      </td>
+    `;
+    listaPacientes.appendChild(tr);
   });
 }
 
 function entrarModoEdicaoPaciente(paciente) {
-  el.pacienteId.value = paciente.id;
-  el.pacienteNome.value = paciente.nome;
-  el.pacienteIdade.value = paciente.idade;
-  el.pacienteTelefone.value = paciente.telefone;
+  estado.edicao.pacienteId = paciente.id;
+  nomePaciente.value = paciente.nome;
+  idadePaciente.value = paciente.idade ?? '';
+  telefonePaciente.value = paciente.telefone || '';
 
-  el.modoPaciente.textContent = `Modo: Edição (ID ${paciente.id})`;
-  el.btnSalvarPaciente.textContent = 'Atualizar Paciente';
-  el.btnCancelarPaciente.classList.remove('hidden');
+  btnSalvarPaciente.textContent = 'Atualizar paciente';
+  btnCancelarEdicaoPaciente.classList.remove('hidden');
+  modoPaciente.textContent = 'Modo: Edição';
 
-  document.getElementById('tab-pacientes').scrollIntoView({ behavior: 'smooth' });
+  ativarTab('pacientes');
 }
 
 function sairModoEdicaoPaciente() {
-  el.pacienteId.value = '';
-  el.formPaciente.reset();
-
-  el.modoPaciente.textContent = 'Modo: Cadastro';
-  el.btnSalvarPaciente.textContent = 'Salvar Paciente';
-  el.btnCancelarPaciente.classList.add('hidden');
+  estado.edicao.pacienteId = null;
+  formPaciente.reset();
+  btnSalvarPaciente.textContent = 'Salvar paciente';
+  btnCancelarEdicaoPaciente.classList.add('hidden');
+  modoPaciente.textContent = 'Modo: Cadastro';
 }
 
 async function salvarPaciente(event) {
   event.preventDefault();
 
   const payload = {
-    nome: el.pacienteNome.value.trim(),
-    idade: Number(el.pacienteIdade.value),
-    telefone: el.pacienteTelefone.value.trim()
+    nome: nomePaciente.value.trim(),
+    idade: Number(idadePaciente.value),
+    telefone: telefonePaciente.value.trim()
   };
 
   try {
-    if (el.pacienteId.value) {
-      await apiPut(`${API_BASE}/pacientes/${el.pacienteId.value}`, payload);
-      mostrarMensagem('Paciente atualizado com sucesso!');
+    if (estado.edicao.pacienteId) {
+      await apiFetch(`${API_BASE}/pacientes/${estado.edicao.pacienteId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      mostrarToast('Paciente atualizado com sucesso!');
     } else {
-      await apiPost(`${API_BASE}/pacientes`, payload);
-      mostrarMensagem('Paciente cadastrado com sucesso!');
+      await apiFetch(`${API_BASE}/pacientes`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      mostrarToast('Paciente cadastrado com sucesso!');
     }
 
     sairModoEdicaoPaciente();
     await carregarPacientes();
     await carregarConsultas();
   } catch (error) {
-    mostrarMensagem(error.message, 'error');
+    mostrarToast(error.message, 'error');
   }
 }
 
 async function excluirPaciente(id) {
-  const confirmar = confirm('Tem certeza que deseja excluir este paciente?');
+  const paciente = estado.pacientes.find(p => p.id === id);
+  const nome = paciente?.nome || 'este paciente';
 
+  const confirmar = confirm(`Deseja realmente excluir ${nome}? As consultas vinculadas também serão removidas automaticamente.`);
   if (!confirmar) return;
 
   try {
-    await apiDelete(`${API_BASE}/pacientes/${id}`);
-    mostrarMensagem('Paciente excluído com sucesso!');
+    await apiFetch(`${API_BASE}/pacientes/${id}`, {
+      method: 'DELETE'
+    });
+
+    if (estado.edicao.pacienteId == id) {
+      sairModoEdicaoPaciente();
+    }
+
+    mostrarToast('Paciente excluído com sucesso!', 'warning');
     await carregarPacientes();
     await carregarConsultas();
   } catch (error) {
-    mostrarMensagem(error.message, 'error');
+    mostrarToast(error.message, 'error');
   }
 }
 
-// ====================
+// =========================
 // MÉDICOS
-// ====================
-
+// =========================
 async function carregarMedicos() {
-  estado.medicos = await apiGet(`${API_BASE}/medicos`);
-  renderMedicos();
-  preencherSelectMedicos();
+  estado.medicos = await apiFetch(`${API_BASE}/medicos`);
   atualizarDashboard();
-}
-
-function renderMedicos() {
-  el.listaMedicos.innerHTML = '';
-
-  if (estado.medicos.length === 0) {
-    el.listaMedicos.innerHTML = `
-      <tr>
-        <td colspan="4">Nenhum médico cadastrado.</td>
-      </tr>
-    `;
-    return;
-  }
-
-  estado.medicos.forEach((medico) => {
-    const tr = document.createElement('tr');
-
-    tr.innerHTML = `
-      <td>${medico.id}</td>
-      <td>${medico.nome}</td>
-      <td>${medico.especialidade}</td>
-      <td>
-        <button class="btn btn-edit" data-action="editar-medico" data-id="${medico.id}">Editar</button>
-        <button class="btn btn-delete" data-action="excluir-medico" data-id="${medico.id}">Excluir</button>
-      </td>
-    `;
-
-    el.listaMedicos.appendChild(tr);
-  });
+  preencherSelectMedicos();
+  renderizarMedicos();
 }
 
 function preencherSelectMedicos() {
-  el.consultaMedico.innerHTML = '<option value="">Selecione um médico</option>';
+  const valorAtual = medicoConsulta.value;
 
-  estado.medicos.forEach((medico) => {
+  medicoConsulta.innerHTML = '<option value="">Selecione o médico</option>';
+
+  estado.medicos.forEach(medico => {
     const option = document.createElement('option');
     option.value = medico.id;
-    option.textContent = `${medico.id} - ${medico.nome}`;
-    el.consultaMedico.appendChild(option);
+    option.textContent = medico.nome;
+    medicoConsulta.appendChild(option);
+  });
+
+  if ([...medicoConsulta.options].some(opt => opt.value === valorAtual)) {
+    medicoConsulta.value = valorAtual;
+  }
+}
+
+function obterMedicosFiltrados() {
+  let lista = [...estado.medicos];
+  const busca = estado.filtros.medicos.busca.toLowerCase().trim();
+  const ordenacao = estado.filtros.medicos.ordenacao;
+
+  if (busca) {
+    lista = lista.filter(m =>
+      (m.nome || '').toLowerCase().includes(busca) ||
+      (m.especialidade || '').toLowerCase().includes(busca)
+    );
+  }
+
+  switch (ordenacao) {
+    case 'nome-asc':
+      lista.sort((a, b) => a.nome.localeCompare(b.nome));
+      break;
+    case 'nome-desc':
+      lista.sort((a, b) => b.nome.localeCompare(a.nome));
+      break;
+    case 'esp-asc':
+      lista.sort((a, b) => (a.especialidade || '').localeCompare(b.especialidade || ''));
+      break;
+    case 'esp-desc':
+      lista.sort((a, b) => (b.especialidade || '').localeCompare(a.especialidade || ''));
+      break;
+  }
+
+  return lista;
+}
+
+function renderizarMedicos() {
+  const medicosFiltrados = obterMedicosFiltrados();
+  const medicosPagina = obterPagina(medicosFiltrados, 'medicos');
+
+  listaMedicos.innerHTML = '';
+
+  if (!medicosFiltrados.length) {
+    listaMedicos.innerHTML = `
+      <tr>
+        <td colspan="3" class="vazio">Nenhum médico encontrado.</td>
+      </tr>
+    `;
+    atualizarControlesPaginacao('medicos', 0);
+    return;
+  }
+
+  medicosPagina.forEach(medico => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${medico.nome}</td>
+      <td>${medico.especialidade || '-'}</td>
+      <td>
+        <div class="acoes">
+          <button class="btn-editar" data-id="${medico.id}" data-tipo="medico">Editar</button>
+          <button class="btn-excluir" data-id="${medico.id}" data-tipo="medico">Excluir</button>
+        </div>
+      </td>
+    `;
+    listaMedicos.appendChild(tr);
   });
 }
 
 function entrarModoEdicaoMedico(medico) {
-  el.medicoId.value = medico.id;
-  el.medicoNome.value = medico.nome;
-  el.medicoEspecialidade.value = medico.especialidade;
+  estado.edicao.medicoId = medico.id;
+  nomeMedico.value = medico.nome;
+  especialidadeMedico.value = medico.especialidade || '';
 
-  el.modoMedico.textContent = `Modo: Edição (ID ${medico.id})`;
-  el.btnSalvarMedico.textContent = 'Atualizar Médico';
-  el.btnCancelarMedico.classList.remove('hidden');
+  btnSalvarMedico.textContent = 'Atualizar médico';
+  btnCancelarEdicaoMedico.classList.remove('hidden');
+  modoMedico.textContent = 'Modo: Edição';
 
-  document.getElementById('tab-medicos').scrollIntoView({ behavior: 'smooth' });
+  ativarTab('medicos');
 }
 
 function sairModoEdicaoMedico() {
-  el.medicoId.value = '';
-  el.formMedico.reset();
-
-  el.modoMedico.textContent = 'Modo: Cadastro';
-  el.btnSalvarMedico.textContent = 'Salvar Médico';
-  el.btnCancelarMedico.classList.add('hidden');
+  estado.edicao.medicoId = null;
+  formMedico.reset();
+  btnSalvarMedico.textContent = 'Salvar médico';
+  btnCancelarEdicaoMedico.classList.add('hidden');
+  modoMedico.textContent = 'Modo: Cadastro';
 }
 
 async function salvarMedico(event) {
   event.preventDefault();
 
   const payload = {
-    nome: el.medicoNome.value.trim(),
-    especialidade: el.medicoEspecialidade.value.trim()
+    nome: nomeMedico.value.trim(),
+    especialidade: especialidadeMedico.value.trim()
   };
 
   try {
-    if (el.medicoId.value) {
-      await apiPut(`${API_BASE}/medicos/${el.medicoId.value}`, payload);
-      mostrarMensagem('Médico atualizado com sucesso!');
+    if (estado.edicao.medicoId) {
+      await apiFetch(`${API_BASE}/medicos/${estado.edicao.medicoId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      mostrarToast('Médico atualizado com sucesso!');
     } else {
-      await apiPost(`${API_BASE}/medicos`, payload);
-      mostrarMensagem('Médico cadastrado com sucesso!');
+      await apiFetch(`${API_BASE}/medicos`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      mostrarToast('Médico cadastrado com sucesso!');
     }
 
     sairModoEdicaoMedico();
     await carregarMedicos();
     await carregarConsultas();
   } catch (error) {
-    mostrarMensagem(error.message, 'error');
+    mostrarToast(error.message, 'error');
   }
 }
 
 async function excluirMedico(id) {
-  const confirmar = confirm('Tem certeza que deseja excluir este médico?');
+  const medico = estado.medicos.find(m => m.id === id);
+  const nome = medico?.nome || 'este médico';
 
+  const confirmar = confirm(`Deseja realmente excluir ${nome}? As consultas vinculadas também serão removidas automaticamente.`);
   if (!confirmar) return;
 
   try {
-    await apiDelete(`${API_BASE}/medicos/${id}`);
-    mostrarMensagem('Médico excluído com sucesso!');
+    await apiFetch(`${API_BASE}/medicos/${id}`, {
+      method: 'DELETE'
+    });
+
+    if (estado.edicao.medicoId == id) {
+      sairModoEdicaoMedico();
+    }
+
+    mostrarToast('Médico excluído com sucesso!', 'warning');
     await carregarMedicos();
     await carregarConsultas();
   } catch (error) {
-    mostrarMensagem(error.message, 'error');
+    mostrarToast(error.message, 'error');
   }
 }
 
-// ====================
+// =========================
 // CONSULTAS
-// ====================
-
+// =========================
 async function carregarConsultas() {
-  estado.consultas = await apiGet(`${API_BASE}/consultas`);
-  renderConsultas();
+  estado.consultas = await apiFetch(`${API_BASE}/consultas`);
   atualizarDashboard();
+  renderizarConsultas();
 }
 
-function renderConsultas() {
-  el.listaConsultas.innerHTML = '';
+function obterConsultasFiltradas() {
+  let lista = [...estado.consultas];
+  const busca = estado.filtros.consultas.busca.toLowerCase().trim();
+  const ordenacao = estado.filtros.consultas.ordenacao;
 
-  if (estado.consultas.length === 0) {
-    el.listaConsultas.innerHTML = `
+  if (busca) {
+    lista = lista.filter(c => {
+      const nomePaciente = obterNomePaciente(c).toLowerCase();
+      const nomeMedico = obterNomeMedico(c).toLowerCase();
+      const descricao = (c.descricao || '').toLowerCase();
+
+      return (
+        nomePaciente.includes(busca) ||
+        nomeMedico.includes(busca) ||
+        descricao.includes(busca)
+      );
+    });
+  }
+
+  switch (ordenacao) {
+    case 'data-asc':
+      lista.sort((a, b) => new Date(a.data_consulta) - new Date(b.data_consulta));
+      break;
+    case 'data-desc':
+      lista.sort((a, b) => new Date(b.data_consulta) - new Date(a.data_consulta));
+      break;
+    case 'paciente-asc':
+      lista.sort((a, b) => obterNomePaciente(a).localeCompare(obterNomePaciente(b)));
+      break;
+    case 'medico-asc':
+      lista.sort((a, b) => obterNomeMedico(a).localeCompare(obterNomeMedico(b)));
+      break;
+  }
+
+  return lista;
+}
+
+function renderizarConsultas() {
+  const consultasFiltradas = obterConsultasFiltradas();
+  const consultasPagina = obterPagina(consultasFiltradas, 'consultas');
+
+  listaConsultas.innerHTML = '';
+
+  if (!consultasFiltradas.length) {
+    listaConsultas.innerHTML = `
       <tr>
-        <td colspan="6">Nenhuma consulta cadastrada.</td>
+        <td colspan="5" class="vazio">Nenhuma consulta encontrada.</td>
       </tr>
     `;
+    atualizarControlesPaginacao('consultas', 0);
     return;
   }
 
-  estado.consultas.forEach((consulta) => {
+  consultasPagina.forEach(consulta => {
     const tr = document.createElement('tr');
-
-    const pacienteTexto = consulta.paciente_nome || consulta.paciente_id;
-    const medicoTexto = consulta.medico_nome || consulta.medico_id;
-
     tr.innerHTML = `
-      <td>${consulta.id}</td>
-      <td>${pacienteTexto}</td>
-      <td>${medicoTexto}</td>
-      <td>${formatarDataParaInput(consulta.data_consulta)}</td>
-      <td>${consulta.descricao ?? ''}</td>
+      <td>${obterNomePaciente(consulta)}</td>
+      <td>${obterNomeMedico(consulta)}</td>
+      <td>${formatarData(consulta.data_consulta)}</td>
+      <td>${consulta.descricao || '-'}</td>
       <td>
-        <button class="btn btn-edit" data-action="editar-consulta" data-id="${consulta.id}">Editar</button>
-        <button class="btn btn-delete" data-action="excluir-consulta" data-id="${consulta.id}">Excluir</button>
+        <div class="acoes">
+          <button class="btn-editar" data-id="${consulta.id}" data-tipo="consulta">Editar</button>
+          <button class="btn-excluir" data-id="${consulta.id}" data-tipo="consulta">Excluir</button>
+        </div>
       </td>
     `;
-
-    el.listaConsultas.appendChild(tr);
+    listaConsultas.appendChild(tr);
   });
 }
 
 function entrarModoEdicaoConsulta(consulta) {
-  el.consultaId.value = consulta.id;
-  el.consultaPaciente.value = consulta.paciente_id;
-  el.consultaMedico.value = consulta.medico_id;
-  el.consultaData.value = formatarDataParaInput(consulta.data_consulta);
-  el.consultaDescricao.value = consulta.descricao ?? '';
+  estado.edicao.consultaId = consulta.id;
 
-  el.modoConsulta.textContent = `Modo: Edição (ID ${consulta.id})`;
-  el.btnSalvarConsulta.textContent = 'Atualizar Consulta';
-  el.btnCancelarConsulta.classList.remove('hidden');
+  pacienteConsulta.value = String(consulta.paciente_id);
+  medicoConsulta.value = String(consulta.medico_id);
 
-  document.getElementById('tab-consultas').scrollIntoView({ behavior: 'smooth' });
+  const dataAjustada = consulta.data_consulta
+    ? new Date(consulta.data_consulta).toISOString().split('T')[0]
+    : '';
+
+  dataConsulta.value = dataAjustada;
+  descricaoConsulta.value = consulta.descricao || '';
+
+  btnSalvarConsulta.textContent = 'Atualizar consulta';
+  btnCancelarEdicaoConsulta.classList.remove('hidden');
+  modoConsulta.textContent = 'Modo: Edição';
+
+  ativarTab('consultas');
 }
 
 function sairModoEdicaoConsulta() {
-  el.consultaId.value = '';
-  el.formConsulta.reset();
-
-  el.modoConsulta.textContent = 'Modo: Cadastro';
-  el.btnSalvarConsulta.textContent = 'Salvar Consulta';
-  el.btnCancelarConsulta.classList.add('hidden');
+  estado.edicao.consultaId = null;
+  formConsulta.reset();
+  btnSalvarConsulta.textContent = 'Salvar consulta';
+  btnCancelarEdicaoConsulta.classList.add('hidden');
+  modoConsulta.textContent = 'Modo: Cadastro';
 }
 
 async function salvarConsulta(event) {
   event.preventDefault();
 
   const payload = {
-    paciente_id: Number(el.consultaPaciente.value),
-    medico_id: Number(el.consultaMedico.value),
-    data_consulta: formatarDataParaBanco(el.consultaData.value),
-    descricao: el.consultaDescricao.value.trim()
+    paciente_id: Number(pacienteConsulta.value),
+    medico_id: Number(medicoConsulta.value),
+    data_consulta: dataConsulta.value,
+    descricao: descricaoConsulta.value.trim()
   };
 
   try {
-    if (el.consultaId.value) {
-      await apiPut(`${API_BASE}/consultas/${el.consultaId.value}`, payload);
-      mostrarMensagem('Consulta atualizada com sucesso!');
+    if (estado.edicao.consultaId) {
+      await apiFetch(`${API_BASE}/consultas/${estado.edicao.consultaId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      mostrarToast('Consulta atualizada com sucesso!');
     } else {
-      await apiPost(`${API_BASE}/consultas`, payload);
-      mostrarMensagem('Consulta cadastrada com sucesso!');
+      await apiFetch(`${API_BASE}/consultas`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      mostrarToast('Consulta cadastrada com sucesso!');
     }
 
     sairModoEdicaoConsulta();
     await carregarConsultas();
   } catch (error) {
-    mostrarMensagem(error.message, 'error');
+    mostrarToast(error.message, 'error');
   }
 }
 
 async function excluirConsulta(id) {
-  const confirmar = confirm('Tem certeza que deseja excluir esta consulta?');
+  const consulta = estado.consultas.find(c => c.id === id);
+  const nomePaciente = consulta ? obterNomePaciente(consulta) : 'esta consulta';
 
+  const confirmar = confirm(`Deseja realmente excluir a consulta de ${nomePaciente}?`);
   if (!confirmar) return;
 
   try {
-    await apiDelete(`${API_BASE}/consultas/${id}`);
-    mostrarMensagem('Consulta excluída com sucesso!');
+    await apiFetch(`${API_BASE}/consultas/${id}`, {
+      method: 'DELETE'
+    });
+
+    if (estado.edicao.consultaId == id) {
+      sairModoEdicaoConsulta();
+    }
+
+    mostrarToast('Consulta excluída com sucesso!', 'warning');
     await carregarConsultas();
   } catch (error) {
-    mostrarMensagem(error.message, 'error');
+    mostrarToast(error.message, 'error');
   }
 }
 
-// ====================
-// EVENTOS DAS TABELAS
-// ====================
+// =========================
+// DASHBOARD + GRÁFICO PIZZA
+// =========================
+function atualizarDashboard() {
+  totalPacientes.textContent = estado.pacientes.length;
+  totalMedicos.textContent = estado.medicos.length;
+  totalConsultas.textContent = estado.consultas.length;
 
-function registrarEventosTabelas() {
-  el.listaPacientes.addEventListener('click', async (event) => {
-    const botao = event.target.closest('button');
-    if (!botao) return;
+  desenharGraficoPizza();
+}
 
-    const id = Number(botao.dataset.id);
-    const action = botao.dataset.action;
+function desenharGraficoPizza() {
+  if (!graficoPizzaCanvas) return;
 
-    if (action === 'editar-paciente') {
-      const paciente = estado.pacientes.find((item) => item.id === id);
+  const ctx = graficoPizzaCanvas.getContext('2d');
+  const largura = graficoPizzaCanvas.width;
+  const altura = graficoPizzaCanvas.height;
+  const centroX = largura / 2;
+  const centroY = altura / 2;
+  const raio = Math.min(largura, altura) / 2 - 12;
+
+  ctx.clearRect(0, 0, largura, altura);
+
+  const dados = [
+    { label: 'Pacientes', valor: estado.pacientes.length, cor: '#2563eb' },
+    { label: 'Médicos', valor: estado.medicos.length, cor: '#10b981' },
+    { label: 'Consultas', valor: estado.consultas.length, cor: '#f59e0b' }
+  ];
+
+  const total = dados.reduce((acc, item) => acc + item.valor, 0);
+
+  if (total === 0) {
+    ctx.beginPath();
+    ctx.arc(centroX, centroY, raio, 0, Math.PI * 2);
+    ctx.fillStyle = '#e5e7eb';
+    ctx.fill();
+
+    ctx.fillStyle = '#6b7280';
+    ctx.font = 'bold 16px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('Sem dados', centroX, centroY + 5);
+    return;
+  }
+
+  let anguloInicial = -Math.PI / 2;
+
+  dados.forEach(item => {
+    const anguloFinal = anguloInicial + (item.valor / total) * Math.PI * 2;
+
+    ctx.beginPath();
+    ctx.moveTo(centroX, centroY);
+    ctx.arc(centroX, centroY, raio, anguloInicial, anguloFinal);
+    ctx.closePath();
+    ctx.fillStyle = item.cor;
+    ctx.fill();
+
+    anguloInicial = anguloFinal;
+  });
+
+  // círculo interno para efeito donut
+  ctx.beginPath();
+  ctx.arc(centroX, centroY, raio * 0.5, 0, Math.PI * 2);
+  ctx.fillStyle = '#ffffff';
+  ctx.fill();
+
+  ctx.fillStyle = '#111827';
+  ctx.font = 'bold 16px Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText(String(total), centroX, centroY + 5);
+}
+
+// =========================
+// EVENTOS DE AÇÕES NAS TABELAS
+// =========================
+document.addEventListener('click', async (event) => {
+  const botao = event.target.closest('button[data-id][data-tipo]');
+  if (!botao) return;
+
+  const id = Number(botao.dataset.id);
+  const tipo = botao.dataset.tipo;
+  const acao = botao.classList.contains('btn-editar') ? 'editar' : 'excluir';
+
+  if (tipo === 'paciente') {
+    if (acao === 'editar') {
+      const paciente = estado.pacientes.find(p => p.id === id);
       if (paciente) entrarModoEdicaoPaciente(paciente);
-    }
-
-    if (action === 'excluir-paciente') {
+    } else {
       await excluirPaciente(id);
     }
-  });
+  }
 
-  el.listaMedicos.addEventListener('click', async (event) => {
-    const botao = event.target.closest('button');
-    if (!botao) return;
-
-    const id = Number(botao.dataset.id);
-    const action = botao.dataset.action;
-
-    if (action === 'editar-medico') {
-      const medico = estado.medicos.find((item) => item.id === id);
+  if (tipo === 'medico') {
+    if (acao === 'editar') {
+      const medico = estado.medicos.find(m => m.id === id);
       if (medico) entrarModoEdicaoMedico(medico);
-    }
-
-    if (action === 'excluir-medico') {
+    } else {
       await excluirMedico(id);
     }
-  });
+  }
 
-  el.listaConsultas.addEventListener('click', async (event) => {
-    const botao = event.target.closest('button');
-    if (!botao) return;
-
-    const id = Number(botao.dataset.id);
-    const action = botao.dataset.action;
-
-    if (action === 'editar-consulta') {
-      const consulta = estado.consultas.find((item) => item.id === id);
+  if (tipo === 'consulta') {
+    if (acao === 'editar') {
+      const consulta = estado.consultas.find(c => c.id === id);
       if (consulta) entrarModoEdicaoConsulta(consulta);
-    }
-
-    if (action === 'excluir-consulta') {
+    } else {
       await excluirConsulta(id);
     }
-  });
-}
+  }
+});
 
-// ====================
-// REGISTRO DE EVENTOS
-// ====================
+// =========================
+// EVENTOS FORMULÁRIOS
+// =========================
+formPaciente.addEventListener('submit', salvarPaciente);
+btnCancelarEdicaoPaciente.addEventListener('click', sairModoEdicaoPaciente);
 
-function registrarEventos() {
-  el.formPaciente.addEventListener('submit', salvarPaciente);
-  el.formMedico.addEventListener('submit', salvarMedico);
-  el.formConsulta.addEventListener('submit', salvarConsulta);
+formMedico.addEventListener('submit', salvarMedico);
+btnCancelarEdicaoMedico.addEventListener('click', sairModoEdicaoMedico);
 
-  el.btnCancelarPaciente.addEventListener('click', sairModoEdicaoPaciente);
-  el.btnCancelarMedico.addEventListener('click', sairModoEdicaoMedico);
-  el.btnCancelarConsulta.addEventListener('click', sairModoEdicaoConsulta);
+formConsulta.addEventListener('submit', salvarConsulta);
+btnCancelarEdicaoConsulta.addEventListener('click', sairModoEdicaoConsulta);
 
-  registrarEventosTabelas();
-}
+// =========================
+// PAGINAÇÃO
+// =========================
+btnAnteriorPacientes.addEventListener('click', () => irParaPaginaAnterior('pacientes'));
+btnProximaPacientes.addEventListener('click', () => {
+  const total = obterPacientesFiltrados().length;
+  irParaProximaPagina('pacientes', total);
+});
 
-// ====================
-// INIT
-// ====================
+btnAnteriorMedicos.addEventListener('click', () => irParaPaginaAnterior('medicos'));
+btnProximaMedicos.addEventListener('click', () => {
+  const total = obterMedicosFiltrados().length;
+  irParaProximaPagina('medicos', total);
+});
 
-async function init() {
+btnAnteriorConsultas.addEventListener('click', () => irParaPaginaAnterior('consultas'));
+btnProximaConsultas.addEventListener('click', () => {
+  const total = obterConsultasFiltradas().length;
+  irParaProximaPagina('consultas', total);
+});
+
+// =========================
+// FILTROS PACIENTES
+// =========================
+buscaPaciente.value = estado.filtros.pacientes.busca;
+ordenacaoPaciente.value = estado.filtros.pacientes.ordenacao;
+
+buscaPaciente.addEventListener('input', () => {
+  estado.filtros.pacientes.busca = buscaPaciente.value;
+  salvarFiltro('filtro_paciente_busca', buscaPaciente.value);
+  resetarPagina('pacientes');
+  renderizarPacientes();
+});
+
+ordenacaoPaciente.addEventListener('change', () => {
+  estado.filtros.pacientes.ordenacao = ordenacaoPaciente.value;
+  salvarFiltro('filtro_paciente_ordenacao', ordenacaoPaciente.value);
+  resetarPagina('pacientes');
+  renderizarPacientes();
+});
+
+limparFiltroPaciente.addEventListener('click', () => {
+  estado.filtros.pacientes.busca = '';
+  estado.filtros.pacientes.ordenacao = 'nome-asc';
+  buscaPaciente.value = '';
+  ordenacaoPaciente.value = 'nome-asc';
+  salvarFiltro('filtro_paciente_busca', '');
+  salvarFiltro('filtro_paciente_ordenacao', 'nome-asc');
+  resetarPagina('pacientes');
+  renderizarPacientes();
+  mostrarToast('Filtros de pacientes limpos!', 'warning');
+});
+
+// =========================
+// FILTROS MÉDICOS
+// =========================
+buscaMedico.value = estado.filtros.medicos.busca;
+ordenacaoMedico.value = estado.filtros.medicos.ordenacao;
+
+buscaMedico.addEventListener('input', () => {
+  estado.filtros.medicos.busca = buscaMedico.value;
+  salvarFiltro('filtro_medico_busca', buscaMedico.value);
+  resetarPagina('medicos');
+  renderizarMedicos();
+});
+
+ordenacaoMedico.addEventListener('change', () => {
+  estado.filtros.medicos.ordenacao = ordenacaoMedico.value;
+  salvarFiltro('filtro_medico_ordenacao', ordenacaoMedico.value);
+  resetarPagina('medicos');
+  renderizarMedicos();
+});
+
+limparFiltroMedico.addEventListener('click', () => {
+  estado.filtros.medicos.busca = '';
+  estado.filtros.medicos.ordenacao = 'nome-asc';
+  buscaMedico.value = '';
+  ordenacaoMedico.value = 'nome-asc';
+  salvarFiltro('filtro_medico_busca', '');
+  salvarFiltro('filtro_medico_ordenacao', 'nome-asc');
+  resetarPagina('medicos');
+  renderizarMedicos();
+  mostrarToast('Filtros de médicos limpos!', 'warning');
+});
+
+// =========================
+// FILTROS CONSULTAS
+// =========================
+buscaConsulta.value = estado.filtros.consultas.busca;
+ordenacaoConsulta.value = estado.filtros.consultas.ordenacao;
+
+buscaConsulta.addEventListener('input', () => {
+  estado.filtros.consultas.busca = buscaConsulta.value;
+  salvarFiltro('filtro_consulta_busca', buscaConsulta.value);
+  resetarPagina('consultas');
+  renderizarConsultas();
+});
+
+ordenacaoConsulta.addEventListener('change', () => {
+  estado.filtros.consultas.ordenacao = ordenacaoConsulta.value;
+  salvarFiltro('filtro_consulta_ordenacao', ordenacaoConsulta.value);
+  resetarPagina('consultas');
+  renderizarConsultas();
+});
+
+limparFiltroConsulta.addEventListener('click', () => {
+  estado.filtros.consultas.busca = '';
+  estado.filtros.consultas.ordenacao = 'data-asc';
+  buscaConsulta.value = '';
+  ordenacaoConsulta.value = 'data-asc';
+  salvarFiltro('filtro_consulta_busca', '');
+  salvarFiltro('filtro_consulta_ordenacao', 'data-asc');
+  resetarPagina('consultas');
+  renderizarConsultas();
+  mostrarToast('Filtros de consultas limpos!', 'warning');
+});
+
+// =========================
+// INICIALIZAÇÃO
+// =========================
+async function inicializar() {
   try {
-    alternarAbas();
-    registrarEventos();
+    restaurarTabAtiva();
 
     await carregarPacientes();
     await carregarMedicos();
     await carregarConsultas();
+
+    mostrarToast('Sistema carregado com sucesso!');
   } catch (error) {
     console.error(error);
-    mostrarMensagem('Erro ao inicializar o sistema', 'error');
+    mostrarToast(`Erro ao inicializar: ${error.message}`, 'error');
   }
 }
 
-init();
+inicializar();
