@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard - Clínica Médica</title>
+  <link rel="stylesheet" href="./css/style.css" />
+</head>
+<body>
+  <div class="container dashboard-page">
+    <header class="topo">
+      <h1>📊 Dashboard da Clínica Médica</h1>
+      <p class="subtitulo">Visão consolidada do sistema com gráfico interativo</p>
+    </header>
+
+    <div class="acoes-topo">
+      <a href="./index.html" class="btn-dashboard-link btn-voltar">⬅ Voltar para o sistema principal</a>
+    </div>
+
+    <section class="dashboard dashboard-home dashboard-cards-top">
+      <div class="card-dashboard card-dashboard-strong">
+        <span class="card-label">Total de Pacientes</span>
+        <strong id="dashTotalPacientes">0</strong>
+      </div>
+      <div class="card-dashboard card-dashboard-strong">
+        <span class="card-label">Total de Médicos</span>
+        <strong id="dashTotalMedicos">0</strong>
+      </div>
+      <div class="card-dashboard card-dashboard-strong">
+        <span class="card-label">Total de Consultas</span>
+        <strong id="dashTotalConsultas">0</strong>
+      </div>
+      <div class="card-dashboard card-dashboard-strong">
+        <span class="card-label">Média de Consultas por Paciente</span>
+        <strong id="dashMediaConsultas">0.00</strong>
+      </div>
+    </section>
+
+    <section class="painel-grafico">
+      <div class="grafico-box">
+        <h2>Distribuição Geral</h2>
+        <div class="grafico-wrapper">
+          <canvas id="graficoPizza" width="360" height="360"></canvas>
+          <div id="tooltipGrafico" class="grafico-tooltip hidden"></div>
+        </div>
+      </div>
+
+      <div class="legenda-box">
+        <h3>Legenda do gráfico</h3>
+        <ul id="legendaGrafico" class="legenda-grafico"></ul>
+      </div>
+    </section>
+  </div>
+
+  <script type="module" src="./js/dashboard.js"></script>
+</body>
+</html>

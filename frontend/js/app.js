@@ -94,6 +94,11 @@ const toastContainer = document.getElementById('toastContainer');
 // UTILITÁRIOS
 // =========================
 function mostrarToast(mensagem, tipo = 'success') {
+  if (!toastContainer) {
+    console.warn('toastContainer não encontrado:', mensagem);
+    return;
+  }
+
   const toast = document.createElement('div');
   toast.className = `toast ${tipo}`;
   toast.textContent = mensagem;
@@ -150,21 +155,21 @@ function atualizarControlesPaginacao(tipo, totalItens) {
   const paginaAtual = estado.paginacao[tipo];
 
   if (tipo === 'pacientes') {
-    paginaInfoPacientes.textContent = `Página ${paginaAtual} de ${totalPaginas}`;
-    btnAnteriorPacientes.disabled = paginaAtual <= 1;
-    btnProximaPacientes.disabled = paginaAtual >= totalPaginas;
+    if (paginaInfoPacientes) paginaInfoPacientes.textContent = `Página ${paginaAtual} de ${totalPaginas}`;
+    if (btnAnteriorPacientes) btnAnteriorPacientes.disabled = paginaAtual <= 1;
+    if (btnProximaPacientes) btnProximaPacientes.disabled = paginaAtual >= totalPaginas;
   }
 
   if (tipo === 'medicos') {
-    paginaInfoMedicos.textContent = `Página ${paginaAtual} de ${totalPaginas}`;
-    btnAnteriorMedicos.disabled = paginaAtual <= 1;
-    btnProximaMedicos.disabled = paginaAtual >= totalPaginas;
+    if (paginaInfoMedicos) paginaInfoMedicos.textContent = `Página ${paginaAtual} de ${totalPaginas}`;
+    if (btnAnteriorMedicos) btnAnteriorMedicos.disabled = paginaAtual <= 1;
+    if (btnProximaMedicos) btnProximaMedicos.disabled = paginaAtual >= totalPaginas;
   }
 
   if (tipo === 'consultas') {
-    paginaInfoConsultas.textContent = `Página ${paginaAtual} de ${totalPaginas}`;
-    btnAnteriorConsultas.disabled = paginaAtual <= 1;
-    btnProximaConsultas.disabled = paginaAtual >= totalPaginas;
+    if (paginaInfoConsultas) paginaInfoConsultas.textContent = `Página ${paginaAtual} de ${totalPaginas}`;
+    if (btnAnteriorConsultas) btnAnteriorConsultas.disabled = paginaAtual <= 1;
+    if (btnProximaConsultas) btnProximaConsultas.disabled = paginaAtual >= totalPaginas;
   }
 }
 
@@ -265,6 +270,8 @@ async function carregarPacientes() {
 }
 
 function preencherSelectPacientes() {
+  if (!pacienteConsulta) return;
+
   const valorAtual = pacienteConsulta.value;
 
   pacienteConsulta.innerHTML = '<option value="">Selecione o paciente</option>';
@@ -287,18 +294,30 @@ function obterPacientesFiltrados() {
   const ordenacao = estado.filtros.pacientes.ordenacao;
 
   if (busca) {
-    lista = lista.filter(p =>
-      (p.nome || '').toLowerCase().includes(busca) ||
-      String(p.telefone || '').toLowerCase().includes(busca)
-    );
+    const buscaNumerica = busca.replace(/\D/g, '');
+
+    lista = lista.filter(p => {
+      const nome = (p.nome || '').toLowerCase().trim();
+      const telefoneTexto = String(p.telefone || '').toLowerCase().trim();
+      const telefoneNumerico = telefoneTexto.replace(/\D/g, '');
+
+      const nomeComeca = nome.startsWith(busca);
+
+      const telefoneComecaTexto = telefoneTexto.startsWith(busca);
+
+      const telefoneComecaNumero =
+        buscaNumerica ? telefoneNumerico.startsWith(buscaNumerica) : false;
+
+      return nomeComeca || telefoneComecaTexto || telefoneComecaNumero;
+    });
   }
 
   switch (ordenacao) {
     case 'nome-asc':
-      lista.sort((a, b) => a.nome.localeCompare(b.nome));
+      lista.sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
       break;
     case 'nome-desc':
-      lista.sort((a, b) => b.nome.localeCompare(a.nome));
+      lista.sort((a, b) => (b.nome || '').localeCompare(a.nome || ''));
       break;
     case 'idade-asc':
       lista.sort((a, b) => Number(a.idade) - Number(b.idade));
@@ -312,6 +331,8 @@ function obterPacientesFiltrados() {
 }
 
 function renderizarPacientes() {
+  if (!listaPacientes) return;
+
   const pacientesFiltrados = obterPacientesFiltrados();
   const pacientesPagina = obterPagina(pacientesFiltrados, 'pacientes');
 
@@ -330,7 +351,7 @@ function renderizarPacientes() {
   pacientesPagina.forEach(paciente => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td>${paciente.nome}</td>
+      <td>${paciente.nome || '-'}</td>
       <td>${paciente.idade ?? '-'}</td>
       <td>${paciente.telefone || '-'}</td>
       <td>
@@ -345,8 +366,10 @@ function renderizarPacientes() {
 }
 
 function entrarModoEdicaoPaciente(paciente) {
+  if (!nomePaciente || !idadePaciente || !telefonePaciente || !btnSalvarPaciente || !btnCancelarEdicaoPaciente || !modoPaciente) return;
+
   estado.edicao.pacienteId = paciente.id;
-  nomePaciente.value = paciente.nome;
+  nomePaciente.value = paciente.nome || '';
   idadePaciente.value = paciente.idade ?? '';
   telefonePaciente.value = paciente.telefone || '';
 
@@ -358,6 +381,8 @@ function entrarModoEdicaoPaciente(paciente) {
 }
 
 function sairModoEdicaoPaciente() {
+  if (!formPaciente || !btnSalvarPaciente || !btnCancelarEdicaoPaciente || !modoPaciente) return;
+
   estado.edicao.pacienteId = null;
   formPaciente.reset();
   btnSalvarPaciente.textContent = 'Salvar paciente';
@@ -400,10 +425,10 @@ async function salvarPaciente(event) {
 }
 
 async function excluirPaciente(id) {
-  const paciente = estado.pacientes.find(p => p.id === id);
+  const paciente = estado.pacientes.find(p => p.id == id);
   const nome = paciente?.nome || 'este paciente';
 
-  const confirmar = confirm(`Deseja realmente excluir ${nome}? As consultas vinculadas também serão removidas automaticamente.`);
+  const confirmar = confirm(`Deseja realmente excluir ${nome}?`);
   if (!confirmar) return;
 
   try {
@@ -434,6 +459,8 @@ async function carregarMedicos() {
 }
 
 function preencherSelectMedicos() {
+  if (!medicoConsulta) return;
+
   const valorAtual = medicoConsulta.value;
 
   medicoConsulta.innerHTML = '<option value="">Selecione o médico</option>';
@@ -456,18 +483,23 @@ function obterMedicosFiltrados() {
   const ordenacao = estado.filtros.medicos.ordenacao;
 
   if (busca) {
-    lista = lista.filter(m =>
-      (m.nome || '').toLowerCase().includes(busca) ||
-      (m.especialidade || '').toLowerCase().includes(busca)
-    );
+    lista = lista.filter(m => {
+      const nome = (m.nome || '').toLowerCase().trim();
+      const especialidade = (m.especialidade || '').toLowerCase().trim();
+
+      return (
+        nome.startsWith(busca) ||
+        especialidade.startsWith(busca)
+      );
+    });
   }
 
   switch (ordenacao) {
     case 'nome-asc':
-      lista.sort((a, b) => a.nome.localeCompare(b.nome));
+      lista.sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
       break;
     case 'nome-desc':
-      lista.sort((a, b) => b.nome.localeCompare(a.nome));
+      lista.sort((a, b) => (b.nome || '').localeCompare(a.nome || ''));
       break;
     case 'esp-asc':
       lista.sort((a, b) => (a.especialidade || '').localeCompare(b.especialidade || ''));
@@ -481,6 +513,8 @@ function obterMedicosFiltrados() {
 }
 
 function renderizarMedicos() {
+  if (!listaMedicos) return;
+
   const medicosFiltrados = obterMedicosFiltrados();
   const medicosPagina = obterPagina(medicosFiltrados, 'medicos');
 
@@ -499,7 +533,7 @@ function renderizarMedicos() {
   medicosPagina.forEach(medico => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td>${medico.nome}</td>
+      <td>${medico.nome || '-'}</td>
       <td>${medico.especialidade || '-'}</td>
       <td>
         <div class="acoes">
@@ -513,8 +547,10 @@ function renderizarMedicos() {
 }
 
 function entrarModoEdicaoMedico(medico) {
+  if (!nomeMedico || !especialidadeMedico || !btnSalvarMedico || !btnCancelarEdicaoMedico || !modoMedico) return;
+
   estado.edicao.medicoId = medico.id;
-  nomeMedico.value = medico.nome;
+  nomeMedico.value = medico.nome || '';
   especialidadeMedico.value = medico.especialidade || '';
 
   btnSalvarMedico.textContent = 'Atualizar médico';
@@ -525,6 +561,8 @@ function entrarModoEdicaoMedico(medico) {
 }
 
 function sairModoEdicaoMedico() {
+  if (!formMedico || !btnSalvarMedico || !btnCancelarEdicaoMedico || !modoMedico) return;
+
   estado.edicao.medicoId = null;
   formMedico.reset();
   btnSalvarMedico.textContent = 'Salvar médico';
@@ -566,10 +604,10 @@ async function salvarMedico(event) {
 }
 
 async function excluirMedico(id) {
-  const medico = estado.medicos.find(m => m.id === id);
+  const medico = estado.medicos.find(m => m.id == id);
   const nome = medico?.nome || 'este médico';
 
-  const confirmar = confirm(`Deseja realmente excluir ${nome}? As consultas vinculadas também serão removidas automaticamente.`);
+  const confirmar = confirm(`Deseja realmente excluir ${nome}?`);
   if (!confirmar) return;
 
   try {
@@ -605,14 +643,14 @@ function obterConsultasFiltradas() {
 
   if (busca) {
     lista = lista.filter(c => {
-      const nomePaciente = obterNomePaciente(c).toLowerCase();
-      const nomeMedico = obterNomeMedico(c).toLowerCase();
-      const descricao = (c.descricao || '').toLowerCase();
+      const nomePaciente = obterNomePaciente(c).toLowerCase().trim();
+      const nomeMedico = obterNomeMedico(c).toLowerCase().trim();
+      const descricao = (c.descricao || '').toLowerCase().trim();
 
       return (
-        nomePaciente.includes(busca) ||
-        nomeMedico.includes(busca) ||
-        descricao.includes(busca)
+        nomePaciente.startsWith(busca) ||
+        nomeMedico.startsWith(busca) ||
+        descricao.startsWith(busca)
       );
     });
   }
@@ -636,6 +674,8 @@ function obterConsultasFiltradas() {
 }
 
 function renderizarConsultas() {
+  if (!listaConsultas) return;
+
   const consultasFiltradas = obterConsultasFiltradas();
   const consultasPagina = obterPagina(consultasFiltradas, 'consultas');
 
@@ -670,6 +710,16 @@ function renderizarConsultas() {
 }
 
 function entrarModoEdicaoConsulta(consulta) {
+  if (
+    !pacienteConsulta ||
+    !medicoConsulta ||
+    !dataConsulta ||
+    !descricaoConsulta ||
+    !btnSalvarConsulta ||
+    !btnCancelarEdicaoConsulta ||
+    !modoConsulta
+  ) return;
+
   estado.edicao.consultaId = consulta.id;
 
   pacienteConsulta.value = String(consulta.paciente_id);
@@ -690,6 +740,8 @@ function entrarModoEdicaoConsulta(consulta) {
 }
 
 function sairModoEdicaoConsulta() {
+  if (!formConsulta || !btnSalvarConsulta || !btnCancelarEdicaoConsulta || !modoConsulta) return;
+
   estado.edicao.consultaId = null;
   formConsulta.reset();
   btnSalvarConsulta.textContent = 'Salvar consulta';
@@ -732,7 +784,7 @@ async function salvarConsulta(event) {
 }
 
 async function excluirConsulta(id) {
-  const consulta = estado.consultas.find(c => c.id === id);
+  const consulta = estado.consultas.find(c => c.id == id);
   const nomePaciente = consulta ? obterNomePaciente(consulta) : 'esta consulta';
 
   const confirmar = confirm(`Deseja realmente excluir a consulta de ${nomePaciente}?`);
@@ -758,9 +810,9 @@ async function excluirConsulta(id) {
 // DASHBOARD + GRÁFICO PIZZA
 // =========================
 function atualizarDashboard() {
-  totalPacientes.textContent = estado.pacientes.length;
-  totalMedicos.textContent = estado.medicos.length;
-  totalConsultas.textContent = estado.consultas.length;
+  if (totalPacientes) totalPacientes.textContent = estado.pacientes.length;
+  if (totalMedicos) totalMedicos.textContent = estado.medicos.length;
+  if (totalConsultas) totalConsultas.textContent = estado.consultas.length;
 
   desenharGraficoPizza();
 }
@@ -838,7 +890,7 @@ document.addEventListener('click', async (event) => {
 
   if (tipo === 'paciente') {
     if (acao === 'editar') {
-      const paciente = estado.pacientes.find(p => p.id === id);
+      const paciente = estado.pacientes.find(p => p.id == id);
       if (paciente) entrarModoEdicaoPaciente(paciente);
     } else {
       await excluirPaciente(id);
@@ -847,7 +899,7 @@ document.addEventListener('click', async (event) => {
 
   if (tipo === 'medico') {
     if (acao === 'editar') {
-      const medico = estado.medicos.find(m => m.id === id);
+      const medico = estado.medicos.find(m => m.id == id);
       if (medico) entrarModoEdicaoMedico(medico);
     } else {
       await excluirMedico(id);
@@ -856,7 +908,7 @@ document.addEventListener('click', async (event) => {
 
   if (tipo === 'consulta') {
     if (acao === 'editar') {
-      const consulta = estado.consultas.find(c => c.id === id);
+      const consulta = estado.consultas.find(c => c.id == id);
       if (consulta) entrarModoEdicaoConsulta(consulta);
     } else {
       await excluirConsulta(id);
@@ -867,131 +919,164 @@ document.addEventListener('click', async (event) => {
 // =========================
 // EVENTOS FORMULÁRIOS
 // =========================
-formPaciente.addEventListener('submit', salvarPaciente);
-btnCancelarEdicaoPaciente.addEventListener('click', sairModoEdicaoPaciente);
+if (formPaciente) formPaciente.addEventListener('submit', salvarPaciente);
+if (btnCancelarEdicaoPaciente) btnCancelarEdicaoPaciente.addEventListener('click', sairModoEdicaoPaciente);
 
-formMedico.addEventListener('submit', salvarMedico);
-btnCancelarEdicaoMedico.addEventListener('click', sairModoEdicaoMedico);
+if (formMedico) formMedico.addEventListener('submit', salvarMedico);
+if (btnCancelarEdicaoMedico) btnCancelarEdicaoMedico.addEventListener('click', sairModoEdicaoMedico);
 
-formConsulta.addEventListener('submit', salvarConsulta);
-btnCancelarEdicaoConsulta.addEventListener('click', sairModoEdicaoConsulta);
+if (formConsulta) formConsulta.addEventListener('submit', salvarConsulta);
+if (btnCancelarEdicaoConsulta) btnCancelarEdicaoConsulta.addEventListener('click', sairModoEdicaoConsulta);
 
 // =========================
 // PAGINAÇÃO
 // =========================
-btnAnteriorPacientes.addEventListener('click', () => irParaPaginaAnterior('pacientes'));
-btnProximaPacientes.addEventListener('click', () => {
-  const total = obterPacientesFiltrados().length;
-  irParaProximaPagina('pacientes', total);
-});
+if (btnAnteriorPacientes) {
+  btnAnteriorPacientes.addEventListener('click', () => irParaPaginaAnterior('pacientes'));
+}
 
-btnAnteriorMedicos.addEventListener('click', () => irParaPaginaAnterior('medicos'));
-btnProximaMedicos.addEventListener('click', () => {
-  const total = obterMedicosFiltrados().length;
-  irParaProximaPagina('medicos', total);
-});
+if (btnProximaPacientes) {
+  btnProximaPacientes.addEventListener('click', () => {
+    const total = obterPacientesFiltrados().length;
+    irParaProximaPagina('pacientes', total);
+  });
+}
 
-btnAnteriorConsultas.addEventListener('click', () => irParaPaginaAnterior('consultas'));
-btnProximaConsultas.addEventListener('click', () => {
-  const total = obterConsultasFiltradas().length;
-  irParaProximaPagina('consultas', total);
-});
+if (btnAnteriorMedicos) {
+  btnAnteriorMedicos.addEventListener('click', () => irParaPaginaAnterior('medicos'));
+}
+
+if (btnProximaMedicos) {
+  btnProximaMedicos.addEventListener('click', () => {
+    const total = obterMedicosFiltrados().length;
+    irParaProximaPagina('medicos', total);
+  });
+}
+
+if (btnAnteriorConsultas) {
+  btnAnteriorConsultas.addEventListener('click', () => irParaPaginaAnterior('consultas'));
+}
+
+if (btnProximaConsultas) {
+  btnProximaConsultas.addEventListener('click', () => {
+    const total = obterConsultasFiltradas().length;
+    irParaProximaPagina('consultas', total);
+  });
+}
 
 // =========================
 // FILTROS PACIENTES
 // =========================
-buscaPaciente.value = estado.filtros.pacientes.busca;
-ordenacaoPaciente.value = estado.filtros.pacientes.ordenacao;
+if (buscaPaciente) buscaPaciente.value = estado.filtros.pacientes.busca;
+if (ordenacaoPaciente) ordenacaoPaciente.value = estado.filtros.pacientes.ordenacao;
 
-buscaPaciente.addEventListener('input', () => {
-  estado.filtros.pacientes.busca = buscaPaciente.value;
-  salvarFiltro('filtro_paciente_busca', buscaPaciente.value);
-  resetarPagina('pacientes');
-  renderizarPacientes();
-});
+if (buscaPaciente) {
+  buscaPaciente.addEventListener('input', () => {
+    estado.filtros.pacientes.busca = buscaPaciente.value;
+    salvarFiltro('filtro_paciente_busca', buscaPaciente.value);
+    resetarPagina('pacientes');
+    renderizarPacientes();
+  });
+}
 
-ordenacaoPaciente.addEventListener('change', () => {
-  estado.filtros.pacientes.ordenacao = ordenacaoPaciente.value;
-  salvarFiltro('filtro_paciente_ordenacao', ordenacaoPaciente.value);
-  resetarPagina('pacientes');
-  renderizarPacientes();
-});
+if (ordenacaoPaciente) {
+  ordenacaoPaciente.addEventListener('change', () => {
+    estado.filtros.pacientes.ordenacao = ordenacaoPaciente.value;
+    salvarFiltro('filtro_paciente_ordenacao', ordenacaoPaciente.value);
+    resetarPagina('pacientes');
+    renderizarPacientes();
+  });
+}
 
-limparFiltroPaciente.addEventListener('click', () => {
-  estado.filtros.pacientes.busca = '';
-  estado.filtros.pacientes.ordenacao = 'nome-asc';
-  buscaPaciente.value = '';
-  ordenacaoPaciente.value = 'nome-asc';
-  salvarFiltro('filtro_paciente_busca', '');
-  salvarFiltro('filtro_paciente_ordenacao', 'nome-asc');
-  resetarPagina('pacientes');
-  renderizarPacientes();
-  mostrarToast('Filtros de pacientes limpos!', 'warning');
-});
+if (limparFiltroPaciente) {
+  limparFiltroPaciente.addEventListener('click', () => {
+    estado.filtros.pacientes.busca = '';
+    estado.filtros.pacientes.ordenacao = 'nome-asc';
+    if (buscaPaciente) buscaPaciente.value = '';
+    if (ordenacaoPaciente) ordenacaoPaciente.value = 'nome-asc';
+    salvarFiltro('filtro_paciente_busca', '');
+    salvarFiltro('filtro_paciente_ordenacao', 'nome-asc');
+    resetarPagina('pacientes');
+    renderizarPacientes();
+    mostrarToast('Filtros de pacientes limpos!', 'warning');
+  });
+}
 
 // =========================
 // FILTROS MÉDICOS
 // =========================
-buscaMedico.value = estado.filtros.medicos.busca;
-ordenacaoMedico.value = estado.filtros.medicos.ordenacao;
+if (buscaMedico) buscaMedico.value = estado.filtros.medicos.busca;
+if (ordenacaoMedico) ordenacaoMedico.value = estado.filtros.medicos.ordenacao;
 
-buscaMedico.addEventListener('input', () => {
-  estado.filtros.medicos.busca = buscaMedico.value;
-  salvarFiltro('filtro_medico_busca', buscaMedico.value);
-  resetarPagina('medicos');
-  renderizarMedicos();
-});
+if (buscaMedico) {
+  buscaMedico.addEventListener('input', () => {
+    estado.filtros.medicos.busca = buscaMedico.value;
+    salvarFiltro('filtro_medico_busca', buscaMedico.value);
+    resetarPagina('medicos');
+    renderizarMedicos();
+  });
+}
 
-ordenacaoMedico.addEventListener('change', () => {
-  estado.filtros.medicos.ordenacao = ordenacaoMedico.value;
-  salvarFiltro('filtro_medico_ordenacao', ordenacaoMedico.value);
-  resetarPagina('medicos');
-  renderizarMedicos();
-});
+if (ordenacaoMedico) {
+  ordenacaoMedico.addEventListener('change', () => {
+    estado.filtros.medicos.ordenacao = ordenacaoMedico.value;
+    salvarFiltro('filtro_medico_ordenacao', ordenacaoMedico.value);
+    resetarPagina('medicos');
+    renderizarMedicos();
+  });
+}
 
-limparFiltroMedico.addEventListener('click', () => {
-  estado.filtros.medicos.busca = '';
-  estado.filtros.medicos.ordenacao = 'nome-asc';
-  buscaMedico.value = '';
-  ordenacaoMedico.value = 'nome-asc';
-  salvarFiltro('filtro_medico_busca', '');
-  salvarFiltro('filtro_medico_ordenacao', 'nome-asc');
-  resetarPagina('medicos');
-  renderizarMedicos();
-  mostrarToast('Filtros de médicos limpos!', 'warning');
-});
+if (limparFiltroMedico) {
+  limparFiltroMedico.addEventListener('click', () => {
+    estado.filtros.medicos.busca = '';
+    estado.filtros.medicos.ordenacao = 'nome-asc';
+    if (buscaMedico) buscaMedico.value = '';
+    if (ordenacaoMedico) ordenacaoMedico.value = 'nome-asc';
+    salvarFiltro('filtro_medico_busca', '');
+    salvarFiltro('filtro_medico_ordenacao', 'nome-asc');
+    resetarPagina('medicos');
+    renderizarMedicos();
+    mostrarToast('Filtros de médicos limpos!', 'warning');
+  });
+}
 
 // =========================
 // FILTROS CONSULTAS
 // =========================
-buscaConsulta.value = estado.filtros.consultas.busca;
-ordenacaoConsulta.value = estado.filtros.consultas.ordenacao;
+if (buscaConsulta) buscaConsulta.value = estado.filtros.consultas.busca;
+if (ordenacaoConsulta) ordenacaoConsulta.value = estado.filtros.consultas.ordenacao;
 
-buscaConsulta.addEventListener('input', () => {
-  estado.filtros.consultas.busca = buscaConsulta.value;
-  salvarFiltro('filtro_consulta_busca', buscaConsulta.value);
-  resetarPagina('consultas');
-  renderizarConsultas();
-});
+if (buscaConsulta) {
+  buscaConsulta.addEventListener('input', () => {
+    estado.filtros.consultas.busca = buscaConsulta.value;
+    salvarFiltro('filtro_consulta_busca', buscaConsulta.value);
+    resetarPagina('consultas');
+    renderizarConsultas();
+  });
+}
 
-ordenacaoConsulta.addEventListener('change', () => {
-  estado.filtros.consultas.ordenacao = ordenacaoConsulta.value;
-  salvarFiltro('filtro_consulta_ordenacao', ordenacaoConsulta.value);
-  resetarPagina('consultas');
-  renderizarConsultas();
-});
+if (ordenacaoConsulta) {
+  ordenacaoConsulta.addEventListener('change', () => {
+    estado.filtros.consultas.ordenacao = ordenacaoConsulta.value;
+    salvarFiltro('filtro_consulta_ordenacao', ordenacaoConsulta.value);
+    resetarPagina('consultas');
+    renderizarConsultas();
+  });
+}
 
-limparFiltroConsulta.addEventListener('click', () => {
-  estado.filtros.consultas.busca = '';
-  estado.filtros.consultas.ordenacao = 'data-asc';
-  buscaConsulta.value = '';
-  ordenacaoConsulta.value = 'data-asc';
-  salvarFiltro('filtro_consulta_busca', '');
-  salvarFiltro('filtro_consulta_ordenacao', 'data-asc');
-  resetarPagina('consultas');
-  renderizarConsultas();
-  mostrarToast('Filtros de consultas limpos!', 'warning');
-});
+if (limparFiltroConsulta) {
+  limparFiltroConsulta.addEventListener('click', () => {
+    estado.filtros.consultas.busca = '';
+    estado.filtros.consultas.ordenacao = 'data-asc';
+    if (buscaConsulta) buscaConsulta.value = '';
+    if (ordenacaoConsulta) ordenacaoConsulta.value = 'data-asc';
+    salvarFiltro('filtro_consulta_busca', '');
+    salvarFiltro('filtro_consulta_ordenacao', 'data-asc');
+    resetarPagina('consultas');
+    renderizarConsultas();
+    mostrarToast('Filtros de consultas limpos!', 'warning');
+  });
+}
 
 // =========================
 // INICIALIZAÇÃO

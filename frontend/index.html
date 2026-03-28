@@ -13,48 +13,24 @@
       <p class="subtitulo">Cadastro, consultas, busca e gerenciamento profissional</p>
     </header>
 
-    <section class="dashboard-grid">
-      <div class="dashboard">
-        <div class="card-dashboard">
-          <span class="card-label">Pacientes</span>
-          <strong id="totalPacientes">0</strong>
-        </div>
-        <div class="card-dashboard">
-          <span class="card-label">Médicos</span>
-          <strong id="totalMedicos">0</strong>
-        </div>
-        <div class="card-dashboard">
-          <span class="card-label">Consultas</span>
-          <strong id="totalConsultas">0</strong>
-        </div>
+    <section class="dashboard dashboard-home">
+      <div class="card-dashboard">
+        <span class="card-label">Pacientes</span>
+        <strong id="totalPacientes">0</strong>
       </div>
-
-      <div class="card-grafico">
-        <div class="grafico-header">
-          <h2>📊 Distribuição geral</h2>
-          <p>Pizza por volume total de registros</p>
-        </div>
-
-        <div class="grafico-wrapper">
-          <canvas id="graficoPizza" width="280" height="280"></canvas>
-        </div>
-
-        <div class="legenda-grafico">
-          <div class="legenda-item">
-            <span class="legenda-cor cor-pacientes"></span>
-            <span>Pacientes</span>
-          </div>
-          <div class="legenda-item">
-            <span class="legenda-cor cor-medicos"></span>
-            <span>Médicos</span>
-          </div>
-          <div class="legenda-item">
-            <span class="legenda-cor cor-consultas"></span>
-            <span>Consultas</span>
-          </div>
-        </div>
+      <div class="card-dashboard">
+        <span class="card-label">Médicos</span>
+        <strong id="totalMedicos">0</strong>
+      </div>
+      <div class="card-dashboard">
+        <span class="card-label">Consultas</span>
+        <strong id="totalConsultas">0</strong>
       </div>
     </section>
+
+    <div class="acoes-topo">
+      <a href="./dashboard.html" class="btn-dashboard-link">📊 Abrir Dashboard Completo</a>
+    </div>
 
     <nav class="tabs">
       <button class="tab-btn active" data-tab="pacientes" type="button">Pacientes</button>
@@ -62,7 +38,6 @@
       <button class="tab-btn" data-tab="consultas" type="button">Consultas</button>
     </nav>
 
-    <!-- PACIENTES -->
     <section id="tab-pacientes" class="tab-content active">
       <div class="section-header">
         <h2>👤 Pacientes</h2>
@@ -125,13 +100,12 @@
       </div>
 
       <div class="paginacao">
-        <button type="button" class="btn-secundario" id="btnAnteriorPacientes">Anterior</button>
-        <span id="paginaInfoPacientes" class="pagina-info">Página 1 de 1</span>
-        <button type="button" class="btn-secundario" id="btnProximaPacientes">Próxima</button>
+        <button type="button" id="btnAnteriorPacientes">Anterior</button>
+        <span id="paginaInfoPacientes">Página 1 de 1</span>
+        <button type="button" id="btnProximaPacientes">Próxima</button>
       </div>
     </section>
 
-    <!-- MÉDICOS -->
     <section id="tab-medicos" class="tab-content">
       <div class="section-header">
         <h2>🩺 Médicos</h2>
@@ -188,13 +162,12 @@
       </div>
 
       <div class="paginacao">
-        <button type="button" class="btn-secundario" id="btnAnteriorMedicos">Anterior</button>
-        <span id="paginaInfoMedicos" class="pagina-info">Página 1 de 1</span>
-        <button type="button" class="btn-secundario" id="btnProximaMedicos">Próxima</button>
+        <button type="button" id="btnAnteriorMedicos">Anterior</button>
+        <span id="paginaInfoMedicos">Página 1 de 1</span>
+        <button type="button" id="btnProximaMedicos">Próxima</button>
       </div>
     </section>
 
-    <!-- CONSULTAS -->
     <section id="tab-consultas" class="tab-content">
       <div class="section-header">
         <h2>📅 Consultas</h2>
@@ -267,11 +240,13 @@
       </div>
 
       <div class="paginacao">
-        <button type="button" class="btn-secundario" id="btnAnteriorConsultas">Anterior</button>
-        <span id="paginaInfoConsultas" class="pagina-info">Página 1 de 1</span>
-        <button type="button" class="btn-secundario" id="btnProximaConsultas">Próxima</button>
+        <button type="button" id="btnAnteriorConsultas">Anterior</button>
+        <span id="paginaInfoConsultas">Página 1 de 1</span>
+        <button type="button" id="btnProximaConsultas">Próxima</button>
       </div>
     </section>
+
+    
   </div>
 
   <div id="toastContainer" class="toast-container"></div>
