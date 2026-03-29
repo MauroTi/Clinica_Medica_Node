@@ -203,12 +203,15 @@
           <label for="statusConsulta">Status</label>
           <select id="statusConsulta" required>
             <option value="">Selecione o status</option>
+            <option value="agendada">Agendada</option>
             <option value="pendente">Pendente</option>
             <option value="confirmada">Confirmada</option>
             <option value="realizada">Realizada</option>
             <option value="cancelada">Cancelada</option>
           </select>
         </div>
+
+        <div class="form-actions form-actions-consulta">
           <button type="submit" id="btnSalvarConsulta">Salvar consulta</button>
           <button type="button" class="btn-secundario hidden" id="btnCancelarEdicaoConsulta">Cancelar edição</button>
         </div>
@@ -240,6 +243,7 @@
               <th>Paciente</th>
               <th>Médico</th>
               <th>Data</th>
+              <th>Especialidade</th>
               <th>Descrição</th>
               <th>Status</th>
               <th>Ações</th>
@@ -255,8 +259,6 @@
         <button type="button" id="btnProximaConsultas">Próxima</button>
       </div>
     </section>
-
-    
   </div>
 
   <div id="toastContainer" class="toast-container"></div>

@@ -529,27 +529,6 @@ tr:hover td {
   margin-bottom: 14px;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@media (max-width: 900px) {
-  .painel-grafico {
-    grid-template-columns: 1fr;
-  }
-
-  .grafico-wrapper {
-    min-height: 320px;
-  }
-}
-
 /* BADGES E STATUS */
 .badge {
   display: inline-block;
@@ -588,6 +567,50 @@ tr:hover td {
   border: 1px solid #fca5a5;
 }
 
+/* CONSULTAS - garante layout e estilo dos botões em qualquer tamanho */
+.form-actions-consulta {
+  grid-column: 1 / -1;
+  align-items: center;
+}
+
+#btnSalvarConsulta,
+#btnCancelarEdicaoConsulta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+}
+
+/* opcional: garante visual consistente se o HTML usar classes em vez de IDs */
+.btn-salvar-consulta,
+.btn-atualizar-consulta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 900px) {
+  .painel-grafico {
+    grid-template-columns: 1fr;
+  }
+
+  .grafico-wrapper {
+    min-height: 320px;
+  }
+}
+
 @media (max-width: 768px) {
   body {
     padding: 14px;
@@ -610,7 +633,11 @@ tr:hover td {
 
   .form-actions button,
   .btn-secundario,
-  .btn-copiar-resumo {
+  .btn-copiar-resumo,
+  #btnSalvarConsulta,
+  #btnCancelarEdicaoConsulta,
+  .btn-salvar-consulta,
+  .btn-atualizar-consulta {
     width: 100%;
   }
 

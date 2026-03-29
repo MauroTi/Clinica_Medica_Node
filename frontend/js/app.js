@@ -77,6 +77,7 @@ const pacienteConsulta = document.getElementById('pacienteConsulta');
 const medicoConsulta = document.getElementById('medicoConsulta');
 const dataConsulta = document.getElementById('dataConsulta');
 const descricaoConsulta = document.getElementById('descricaoConsulta');
+const statusConsulta = document.getElementById('statusConsulta');
 const btnSalvarConsulta = document.getElementById('btnSalvarConsulta');
 const btnCancelarEdicaoConsulta = document.getElementById('btnCancelarEdicaoConsulta');
 const modoConsulta = document.getElementById('modoConsulta');
@@ -139,6 +140,29 @@ function obterNomeMedico(item) {
 
   const medico = estado.medicos.find(m => m.id == item.medico_id);
   return medico ? medico.nome : 'Médico não encontrado';
+}
+
+function obterEspecialidadeConsulta(item) {
+  if (item.especialidade) return item.especialidade;
+  if (item.medico_especialidade) return item.medico_especialidade;
+
+  const medico = estado.medicos.find(m => m.id == item.medico_id);
+  return medico?.especialidade || '-';
+}
+
+function formatarStatus(status) {
+  const mapa = {
+    agendada: 'Agendada',
+    pendente: 'Pendente',
+    confirmada: 'Confirmada',
+    realizada: 'Realizada',
+    concluida: 'Concluída',
+    cancelada: 'Cancelada',
+    faltou: 'Faltou'
+  };
+
+  const chave = String(status || 'agendada').toLowerCase();
+  return mapa[chave] || (chave.charAt(0).toUpperCase() + chave.slice(1));
 }
 
 function atualizarControlesPaginacao(tipo, totalItens) {
@@ -302,11 +326,8 @@ function obterPacientesFiltrados() {
       const telefoneNumerico = telefoneTexto.replace(/\D/g, '');
 
       const nomeComeca = nome.startsWith(busca);
-
       const telefoneComecaTexto = telefoneTexto.startsWith(busca);
-
-      const telefoneComecaNumero =
-        buscaNumerica ? telefoneNumerico.startsWith(buscaNumerica) : false;
+      const telefoneComecaNumero = buscaNumerica ? telefoneNumerico.startsWith(buscaNumerica) : false;
 
       return nomeComeca || telefoneComecaTexto || telefoneComecaNumero;
     });
@@ -646,11 +667,15 @@ function obterConsultasFiltradas() {
       const nomePaciente = obterNomePaciente(c).toLowerCase().trim();
       const nomeMedico = obterNomeMedico(c).toLowerCase().trim();
       const descricao = (c.descricao || '').toLowerCase().trim();
+      const especialidade = (obterEspecialidadeConsulta(c) || '').toLowerCase().trim();
+      const status = String(c.status || 'agendada').toLowerCase().trim();
 
       return (
         nomePaciente.startsWith(busca) ||
         nomeMedico.startsWith(busca) ||
-        descricao.startsWith(busca)
+        descricao.startsWith(busca) ||
+        especialidade.startsWith(busca) ||
+        status.startsWith(busca)
       );
     });
   }
@@ -684,7 +709,7 @@ function renderizarConsultas() {
   if (!consultasFiltradas.length) {
     listaConsultas.innerHTML = `
       <tr>
-        <td colspan="6" class="vazio">Nenhuma consulta encontrada.</td>
+        <td colspan="7" class="vazio">Nenhuma consulta encontrada.</td>
       </tr>
     `;
     atualizarControlesPaginacao('consultas', 0);
@@ -692,15 +717,17 @@ function renderizarConsultas() {
   }
 
   consultasPagina.forEach(consulta => {
-    const tr = document.createElement('tr');
-    const statusBadge = consulta.status || 'pendente';
+    const statusBadge = String(consulta.status || 'agendada').toLowerCase();
     const statusClass = `badge-${statusBadge}`;
+
+    const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${obterNomePaciente(consulta)}</td>
       <td>${obterNomeMedico(consulta)}</td>
       <td>${formatarData(consulta.data_consulta)}</td>
+      <td>${obterEspecialidadeConsulta(consulta)}</td>
       <td>${consulta.descricao || '-'}</td>
-      <td><span class="badge ${statusClass}">${statusBadge}</span></td>
+      <td><span class="badge ${statusClass}">${formatarStatus(statusBadge)}</span></td>
       <td>
         <div class="acoes">
           <button class="btn-editar" data-id="${consulta.id}" data-tipo="consulta">Editar</button>
@@ -734,7 +761,7 @@ function entrarModoEdicaoConsulta(consulta) {
 
   dataConsulta.value = dataAjustada;
   descricaoConsulta.value = consulta.descricao || '';
-  document.getElementById('statusConsulta').value = consulta.status || 'pendente';
+  if (statusConsulta) statusConsulta.value = consulta.status || 'agendada';
 
   btnSalvarConsulta.textContent = 'Atualizar consulta';
   btnCancelarEdicaoConsulta.classList.remove('hidden');
@@ -751,6 +778,10 @@ function sairModoEdicaoConsulta() {
   btnSalvarConsulta.textContent = 'Salvar consulta';
   btnCancelarEdicaoConsulta.classList.add('hidden');
   modoConsulta.textContent = 'Modo: Cadastro';
+
+  if (statusConsulta) {
+    statusConsulta.value = 'agendada';
+  }
 }
 
 async function salvarConsulta(event) {
@@ -761,7 +792,7 @@ async function salvarConsulta(event) {
     medico_id: Number(medicoConsulta.value),
     data_consulta: dataConsulta.value,
     descricao: descricaoConsulta.value.trim(),
-    status: document.getElementById('statusConsulta').value
+    status: statusConsulta ? statusConsulta.value : 'agendada'
   };
 
   try {
@@ -870,7 +901,6 @@ function desenharGraficoPizza() {
     anguloInicial = anguloFinal;
   });
 
-  // círculo interno para efeito donut
   ctx.beginPath();
   ctx.arc(centroX, centroY, raio * 0.5, 0, Math.PI * 2);
   ctx.fillStyle = '#ffffff';
