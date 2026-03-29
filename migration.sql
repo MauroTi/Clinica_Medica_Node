@@ -1,0 +1,15 @@
+USE clinica_medica_node;
+
+ALTER TABLE consultas
+ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'agendada' AFTER descricao;
+
+ALTER TABLE consultas
+ADD COLUMN observacao_status VARCHAR(255) NULL AFTER status;
+
+ALTER TABLE consultas
+ADD COLUMN data_criacao DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER observacao_status;
+
+ALTER TABLE consultas
+ADD COLUMN data_atualizacao DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER data_criacao;
+
+DESCRIBE consultas;

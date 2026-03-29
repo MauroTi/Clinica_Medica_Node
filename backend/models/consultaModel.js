@@ -8,6 +8,7 @@ export async function listarConsultas() {
       c.medico_id,
       c.data_consulta,
       c.descricao,
+      c.status,
       p.nome AS paciente_nome,
       m.nome AS medico_nome
     FROM consultas c
@@ -27,6 +28,7 @@ export async function buscarConsultaPorId(id) {
       c.medico_id,
       c.data_consulta,
       c.descricao,
+      c.status,
       p.nome AS paciente_nome,
       m.nome AS medico_nome
     FROM consultas c
@@ -38,19 +40,19 @@ export async function buscarConsultaPorId(id) {
   return rows[0] || null;
 }
 
-export async function criarConsulta(paciente_id, medico_id, data_consulta, descricao) {
+export async function criarConsulta(paciente_id, medico_id, data_consulta, descricao, status = 'pendente') {
   const [result] = await db.execute(
-    'INSERT INTO consultas (paciente_id, medico_id, data_consulta, descricao) VALUES (?, ?, ?, ?)',
-    [paciente_id, medico_id, data_consulta, descricao ?? null]
+    'INSERT INTO consultas (paciente_id, medico_id, data_consulta, descricao, status) VALUES (?, ?, ?, ?, ?)',
+    [paciente_id, medico_id, data_consulta, descricao ?? null, status]
   );
 
   return buscarConsultaPorId(result.insertId);
 }
 
-export async function atualizarConsulta(id, paciente_id, medico_id, data_consulta, descricao) {
+export async function atualizarConsulta(id, paciente_id, medico_id, data_consulta, descricao, status = 'pendente') {
   const [result] = await db.execute(
-    'UPDATE consultas SET paciente_id = ?, medico_id = ?, data_consulta = ?, descricao = ? WHERE id = ?',
-    [paciente_id, medico_id, data_consulta, descricao ?? null, id]
+    'UPDATE consultas SET paciente_id = ?, medico_id = ?, data_consulta = ?, descricao = ?, status = ? WHERE id = ?',
+    [paciente_id, medico_id, data_consulta, descricao ?? null, status, id]
   );
 
   if (result.affectedRows === 0) {

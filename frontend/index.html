@@ -199,7 +199,16 @@
           <input type="text" id="descricaoConsulta" placeholder="Digite a descrição da consulta" required />
         </div>
 
-        <div class="form-actions">
+        <div class="form-group">
+          <label for="statusConsulta">Status</label>
+          <select id="statusConsulta" required>
+            <option value="">Selecione o status</option>
+            <option value="pendente">Pendente</option>
+            <option value="confirmada">Confirmada</option>
+            <option value="realizada">Realizada</option>
+            <option value="cancelada">Cancelada</option>
+          </select>
+        </div>
           <button type="submit" id="btnSalvarConsulta">Salvar consulta</button>
           <button type="button" class="btn-secundario hidden" id="btnCancelarEdicaoConsulta">Cancelar edição</button>
         </div>
@@ -232,6 +241,7 @@
               <th>Médico</th>
               <th>Data</th>
               <th>Descrição</th>
+              <th>Status</th>
               <th>Ações</th>
             </tr>
           </thead>

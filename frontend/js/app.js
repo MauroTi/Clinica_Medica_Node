@@ -684,7 +684,7 @@ function renderizarConsultas() {
   if (!consultasFiltradas.length) {
     listaConsultas.innerHTML = `
       <tr>
-        <td colspan="5" class="vazio">Nenhuma consulta encontrada.</td>
+        <td colspan="6" class="vazio">Nenhuma consulta encontrada.</td>
       </tr>
     `;
     atualizarControlesPaginacao('consultas', 0);
@@ -693,11 +693,14 @@ function renderizarConsultas() {
 
   consultasPagina.forEach(consulta => {
     const tr = document.createElement('tr');
+    const statusBadge = consulta.status || 'pendente';
+    const statusClass = `badge-${statusBadge}`;
     tr.innerHTML = `
       <td>${obterNomePaciente(consulta)}</td>
       <td>${obterNomeMedico(consulta)}</td>
       <td>${formatarData(consulta.data_consulta)}</td>
       <td>${consulta.descricao || '-'}</td>
+      <td><span class="badge ${statusClass}">${statusBadge}</span></td>
       <td>
         <div class="acoes">
           <button class="btn-editar" data-id="${consulta.id}" data-tipo="consulta">Editar</button>
@@ -731,6 +734,7 @@ function entrarModoEdicaoConsulta(consulta) {
 
   dataConsulta.value = dataAjustada;
   descricaoConsulta.value = consulta.descricao || '';
+  document.getElementById('statusConsulta').value = consulta.status || 'pendente';
 
   btnSalvarConsulta.textContent = 'Atualizar consulta';
   btnCancelarEdicaoConsulta.classList.remove('hidden');
@@ -756,7 +760,8 @@ async function salvarConsulta(event) {
     paciente_id: Number(pacienteConsulta.value),
     medico_id: Number(medicoConsulta.value),
     data_consulta: dataConsulta.value,
-    descricao: descricaoConsulta.value.trim()
+    descricao: descricaoConsulta.value.trim(),
+    status: document.getElementById('statusConsulta').value
   };
 
   try {

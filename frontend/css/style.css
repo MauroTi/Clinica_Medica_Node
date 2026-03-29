@@ -550,6 +550,44 @@ tr:hover td {
   }
 }
 
+/* BADGES E STATUS */
+.badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+.badge-agendada,
+.badge-pendente {
+  background-color: #fef08a;
+  color: #7c2d12;
+  border: 1px solid #fcd34d;
+}
+
+.badge-confirmada {
+  background-color: #d1fae5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.badge-realizada,
+.badge-concluida {
+  background-color: #c7d2fe;
+  color: #1e3a8a;
+  border: 1px solid #a5b4fc;
+}
+
+.badge-cancelada,
+.badge-faltou {
+  background-color: #fee2e2;
+  color: #7f1d1d;
+  border: 1px solid #fca5a5;
+}
+
 @media (max-width: 768px) {
   body {
     padding: 14px;
