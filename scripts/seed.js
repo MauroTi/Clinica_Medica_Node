@@ -16,36 +16,48 @@ async function seed() {
   try {
     console.log('🚀 Iniciando seed...');
 
+    // Desabilitar foreign key checks
+    await connection.query('SET FOREIGN_KEY_CHECKS = 0');
+
     // Limpar tabelas
     await connection.query('DELETE FROM consultas');
     await connection.query('DELETE FROM medicos');
     await connection.query('DELETE FROM pacientes');
+
+    // Resetar auto-increment
+    await connection.query('ALTER TABLE pacientes AUTO_INCREMENT = 1');
+    await connection.query('ALTER TABLE medicos AUTO_INCREMENT = 1');
+    await connection.query('ALTER TABLE consultas AUTO_INCREMENT = 1');
+
     console.log('🧹 Tabelas limpas.');
+
+    // Reabilitar foreign key checks
+    await connection.query('SET FOREIGN_KEY_CHECKS = 1');
 
     // Inserir pacientes
     const pacientes = [
-      { nome: 'João Silva', idade: 30, telefone: '11999999999' },
-      { nome: 'Maria Souza', idade: 25, telefone: '11988888888' },
-      { nome: 'Carlos Oliveira', idade: 40, telefone: '11977777777' },
+      { nome: 'João Silva', idade: 30, telefone: '11999999999', cpf: '12345678900', email: 'joao.silva@exemplo.com' },
+      { nome: 'Maria Souza', idade: 25, telefone: '11988888888', cpf: '98765432100', email: 'maria.souza@exemplo.com' },
+      { nome: 'Carlos Oliveira', idade: 40, telefone: '11977777777', cpf: '11122233344', email: 'carlos.oliveira@exemplo.com' },
     ];
 
     for (const p of pacientes) {
       await connection.query(
-        'INSERT INTO pacientes (nome, idade, telefone) VALUES (?, ?, ?)',
-        [p.nome, p.idade, p.telefone]
+        'INSERT INTO pacientes (nome, idade, telefone, cpf, email) VALUES (?, ?, ?, ?, ?)',
+        [p.nome, p.idade, p.telefone, p.cpf, p.email]
       );
     }
 
     // Inserir médicos
     const medicos = [
-      { nome: 'Dr. Ana Pereira', especialidade: 'Cardiologia' },
-      { nome: 'Dr. Paulo Lima', especialidade: 'Dermatologia' },
+      { nome: 'Dr. Ana Pereira', especialidade: 'Cardiologia', crm: 'CRM12345', email: 'ana.pereira@clinica.com', telefone: '11987654321' },
+      { nome: 'Dr. Paulo Lima', especialidade: 'Dermatologia', crm: 'CRM67890', email: 'paulo.lima@clinica.com', telefone: '11987654322' },
     ];
 
     for (const m of medicos) {
       await connection.query(
-        'INSERT INTO medicos (nome, especialidade) VALUES (?, ?)',
-        [m.nome, m.especialidade]
+        'INSERT INTO medicos (nome, especialidade, crm, email, telefone) VALUES (?, ?, ?, ?, ?)',
+        [m.nome, m.especialidade, m.crm, m.email, m.telefone]
       );
     }
 

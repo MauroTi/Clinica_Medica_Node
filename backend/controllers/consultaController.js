@@ -33,7 +33,7 @@ export async function getConsultaPorId(req, res, next) {
 
 export async function postConsulta(req, res, next) {
   try {
-    const { paciente_id, medico_id, data_consulta, descricao, status } = req.body;
+    const { paciente_id, medico_id, data_consulta, descricao, status, observacao_status } = req.body;
 
     if (!paciente_id || !medico_id || !data_consulta) {
       return res.status(400).json({
@@ -46,7 +46,8 @@ export async function postConsulta(req, res, next) {
       medico_id,
       data_consulta,
       descricao,
-      status
+      status,
+      observacao_status
     );
 
     return res.status(201).json({
@@ -61,7 +62,7 @@ export async function postConsulta(req, res, next) {
 export async function putConsulta(req, res, next) {
   try {
     const { id } = req.params;
-    const { paciente_id, medico_id, data_consulta, descricao, status } = req.body;
+    const { paciente_id, medico_id, data_consulta, descricao, status, observacao_status } = req.body;
 
     if (!paciente_id || !medico_id || !data_consulta) {
       return res.status(400).json({
@@ -75,7 +76,8 @@ export async function putConsulta(req, res, next) {
       medico_id,
       data_consulta,
       descricao,
-      status
+      status,
+      observacao_status
     );
 
     if (!consultaAtualizada) {

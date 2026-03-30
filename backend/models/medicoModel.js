@@ -2,36 +2,39 @@ import db from '../../config/db.js';
 
 export async function listarMedicos() {
   const [rows] = await db.execute(
-    'SELECT id, nome, especialidade FROM medicos ORDER BY id DESC'
+    'SELECT id, nome, especialidade, crm, email, telefone FROM medicos ORDER BY id DESC'
   );
   return rows;
 }
 
 export async function buscarMedicoPorId(id) {
   const [rows] = await db.execute(
-    'SELECT id, nome, especialidade FROM medicos WHERE id = ?',
+    'SELECT id, nome, especialidade, crm, email, telefone FROM medicos WHERE id = ?',
     [id]
   );
   return rows[0] || null;
 }
 
-export async function criarMedico(nome, especialidade) {
+export async function criarMedico(nome, especialidade, crm = null, email = null, telefone = null) {
   const [result] = await db.execute(
-    'INSERT INTO medicos (nome, especialidade) VALUES (?, ?)',
-    [nome, especialidade]
+    'INSERT INTO medicos (nome, especialidade, crm, email, telefone) VALUES (?, ?, ?, ?, ?)',
+    [nome, especialidade, crm, email, telefone]
   );
 
   return {
     id: result.insertId,
     nome,
     especialidade,
+    crm,
+    email,
+    telefone
   };
 }
 
-export async function atualizarMedico(id, nome, especialidade) {
+export async function atualizarMedico(id, nome, especialidade, crm = null, email = null, telefone = null) {
   const [result] = await db.execute(
-    'UPDATE medicos SET nome = ?, especialidade = ? WHERE id = ?',
-    [nome, especialidade, id]
+    'UPDATE medicos SET nome = ?, especialidade = ?, crm = ?, email = ?, telefone = ? WHERE id = ?',
+    [nome, especialidade, crm, email, telefone, id]
   );
 
   if (result.affectedRows === 0) {
@@ -42,6 +45,9 @@ export async function atualizarMedico(id, nome, especialidade) {
     id: Number(id),
     nome,
     especialidade,
+    crm,
+    email,
+    telefone
   };
 }
 

@@ -32,15 +32,15 @@ export async function getPacientePorId(req, res, next) {
 
 export async function postPaciente(req, res, next) {
   try {
-    const { nome, idade, telefone } = req.body;
+    const { nome, idade, telefone, cpf, email } = req.body;
 
-    if (!nome || idade === undefined || !telefone) {
+    if (!nome || idade === undefined || !telefone || !email) {
       return res.status(400).json({
-        mensagem: 'Nome, idade e telefone são obrigatórios'
+        mensagem: 'Nome, idade, telefone e email são obrigatórios'
       });
     }
 
-    const novoPaciente = await criarPaciente(nome, idade, telefone);
+    const novoPaciente = await criarPaciente(nome, idade, telefone, cpf, email);
     res.status(201).json(novoPaciente);
   } catch (error) {
     next(error);
@@ -50,15 +50,15 @@ export async function postPaciente(req, res, next) {
 export async function putPaciente(req, res, next) {
   try {
     const { id } = req.params;
-    const { nome, idade, telefone } = req.body;
+    const { nome, idade, telefone, cpf, email } = req.body;
 
-    if (!nome || idade === undefined || !telefone) {
+    if (!nome || idade === undefined || !telefone || !email) {
       return res.status(400).json({
-        mensagem: 'Nome, idade e telefone são obrigatórios'
+        mensagem: 'Nome, idade, telefone e email são obrigatórios'
       });
     }
 
-    const afetados = await atualizarPaciente(id, nome, idade, telefone);
+    const afetados = await atualizarPaciente(id, nome, idade, telefone, cpf, email);
 
     if (afetados === 0) {
       return res.status(404).json({ mensagem: 'Paciente não encontrado' });

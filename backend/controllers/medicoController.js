@@ -33,7 +33,7 @@ export async function getMedicoPorId(req, res, next) {
 
 export async function postMedico(req, res, next) {
   try {
-    const { nome, especialidade } = req.body;
+    const { nome, especialidade, crm, email, telefone } = req.body;
 
     if (!nome || !especialidade) {
       return res.status(400).json({
@@ -41,7 +41,7 @@ export async function postMedico(req, res, next) {
       });
     }
 
-    const novoMedico = await criarMedico(nome, especialidade);
+    const novoMedico = await criarMedico(nome, especialidade, crm, email, telefone);
 
     return res.status(201).json({
       mensagem: 'Médico cadastrado com sucesso.',
@@ -55,7 +55,7 @@ export async function postMedico(req, res, next) {
 export async function putMedico(req, res, next) {
   try {
     const { id } = req.params;
-    const { nome, especialidade } = req.body;
+    const { nome, especialidade, crm, email, telefone } = req.body;
 
     if (!nome || !especialidade) {
       return res.status(400).json({
@@ -63,7 +63,7 @@ export async function putMedico(req, res, next) {
       });
     }
 
-    const medicoAtualizado = await atualizarMedico(id, nome, especialidade);
+    const medicoAtualizado = await atualizarMedico(id, nome, especialidade, crm, email, telefone);
 
     if (!medicoAtualizado) {
       return res.status(404).json({ mensagem: 'Médico não encontrado.' });

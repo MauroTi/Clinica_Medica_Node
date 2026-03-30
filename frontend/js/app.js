@@ -47,6 +47,8 @@ const formPaciente = document.getElementById('formPaciente');
 const nomePaciente = document.getElementById('nomePaciente');
 const idadePaciente = document.getElementById('idadePaciente');
 const telefonePaciente = document.getElementById('telefonePaciente');
+const cpfPaciente = document.getElementById('cpfPaciente');
+const emailPaciente = document.getElementById('emailPaciente');
 const btnSalvarPaciente = document.getElementById('btnSalvarPaciente');
 const btnCancelarEdicaoPaciente = document.getElementById('btnCancelarEdicaoPaciente');
 const modoPaciente = document.getElementById('modoPaciente');
@@ -61,6 +63,9 @@ const btnProximaPacientes = document.getElementById('btnProximaPacientes');
 const formMedico = document.getElementById('formMedico');
 const nomeMedico = document.getElementById('nomeMedico');
 const especialidadeMedico = document.getElementById('especialidadeMedico');
+const crmMedico = document.getElementById('crmMedico');
+const telefoneMedico = document.getElementById('telefoneMedico');
+const emailMedico = document.getElementById('emailMedico');
 const btnSalvarMedico = document.getElementById('btnSalvarMedico');
 const btnCancelarEdicaoMedico = document.getElementById('btnCancelarEdicaoMedico');
 const modoMedico = document.getElementById('modoMedico');
@@ -362,7 +367,7 @@ function renderizarPacientes() {
   if (!pacientesFiltrados.length) {
     listaPacientes.innerHTML = `
       <tr>
-        <td colspan="4" class="vazio">Nenhum paciente encontrado.</td>
+        <td colspan="6" class="vazio">Nenhum paciente encontrado.</td>
       </tr>
     `;
     atualizarControlesPaginacao('pacientes', 0);
@@ -374,7 +379,9 @@ function renderizarPacientes() {
     tr.innerHTML = `
       <td>${paciente.nome || '-'}</td>
       <td>${paciente.idade ?? '-'}</td>
+      <td>${paciente.cpf || '-'}</td>
       <td>${paciente.telefone || '-'}</td>
+      <td>${paciente.email || '-'}</td>
       <td>
         <div class="acoes">
           <button class="btn-editar" data-id="${paciente.id}" data-tipo="paciente">Editar</button>
@@ -387,12 +394,14 @@ function renderizarPacientes() {
 }
 
 function entrarModoEdicaoPaciente(paciente) {
-  if (!nomePaciente || !idadePaciente || !telefonePaciente || !btnSalvarPaciente || !btnCancelarEdicaoPaciente || !modoPaciente) return;
+  if (!nomePaciente || !idadePaciente || !telefonePaciente || !cpfPaciente || !emailPaciente || !btnSalvarPaciente || !btnCancelarEdicaoPaciente || !modoPaciente) return;
 
   estado.edicao.pacienteId = paciente.id;
   nomePaciente.value = paciente.nome || '';
   idadePaciente.value = paciente.idade ?? '';
   telefonePaciente.value = paciente.telefone || '';
+  cpfPaciente.value = paciente.cpf || '';
+  emailPaciente.value = paciente.email || '';
 
   btnSalvarPaciente.textContent = 'Atualizar paciente';
   btnCancelarEdicaoPaciente.classList.remove('hidden');
@@ -409,6 +418,9 @@ function sairModoEdicaoPaciente() {
   btnSalvarPaciente.textContent = 'Salvar paciente';
   btnCancelarEdicaoPaciente.classList.add('hidden');
   modoPaciente.textContent = 'Modo: Cadastro';
+
+  if (cpfPaciente) cpfPaciente.value = '';
+  if (emailPaciente) emailPaciente.value = '';
 }
 
 async function salvarPaciente(event) {
@@ -417,7 +429,9 @@ async function salvarPaciente(event) {
   const payload = {
     nome: nomePaciente.value.trim(),
     idade: Number(idadePaciente.value),
-    telefone: telefonePaciente.value.trim()
+    telefone: telefonePaciente.value.trim(),
+    cpf: cpfPaciente ? cpfPaciente.value.trim() : null,
+    email: emailPaciente ? emailPaciente.value.trim() : null
   };
 
   try {
@@ -544,7 +558,7 @@ function renderizarMedicos() {
   if (!medicosFiltrados.length) {
     listaMedicos.innerHTML = `
       <tr>
-        <td colspan="3" class="vazio">Nenhum médico encontrado.</td>
+        <td colspan="6" class="vazio">Nenhum médico encontrado.</td>
       </tr>
     `;
     atualizarControlesPaginacao('medicos', 0);
@@ -556,6 +570,9 @@ function renderizarMedicos() {
     tr.innerHTML = `
       <td>${medico.nome || '-'}</td>
       <td>${medico.especialidade || '-'}</td>
+      <td>${medico.crm || '-'}</td>
+      <td>${medico.telefone || '-'}</td>
+      <td>${medico.email || '-'}</td>
       <td>
         <div class="acoes">
           <button class="btn-editar" data-id="${medico.id}" data-tipo="medico">Editar</button>
@@ -568,11 +585,14 @@ function renderizarMedicos() {
 }
 
 function entrarModoEdicaoMedico(medico) {
-  if (!nomeMedico || !especialidadeMedico || !btnSalvarMedico || !btnCancelarEdicaoMedico || !modoMedico) return;
+  if (!nomeMedico || !especialidadeMedico || !crmMedico || !telefoneMedico || !emailMedico || !btnSalvarMedico || !btnCancelarEdicaoMedico || !modoMedico) return;
 
   estado.edicao.medicoId = medico.id;
   nomeMedico.value = medico.nome || '';
   especialidadeMedico.value = medico.especialidade || '';
+  crmMedico.value = medico.crm || '';
+  telefoneMedico.value = medico.telefone || '';
+  emailMedico.value = medico.email || '';
 
   btnSalvarMedico.textContent = 'Atualizar médico';
   btnCancelarEdicaoMedico.classList.remove('hidden');
@@ -589,6 +609,10 @@ function sairModoEdicaoMedico() {
   btnSalvarMedico.textContent = 'Salvar médico';
   btnCancelarEdicaoMedico.classList.add('hidden');
   modoMedico.textContent = 'Modo: Cadastro';
+
+  if (crmMedico) crmMedico.value = '';
+  if (telefoneMedico) telefoneMedico.value = '';
+  if (emailMedico) emailMedico.value = '';
 }
 
 async function salvarMedico(event) {
@@ -596,7 +620,10 @@ async function salvarMedico(event) {
 
   const payload = {
     nome: nomeMedico.value.trim(),
-    especialidade: especialidadeMedico.value.trim()
+    especialidade: especialidadeMedico.value.trim(),
+    crm: crmMedico ? crmMedico.value.trim() : null,
+    telefone: telefoneMedico ? telefoneMedico.value.trim() : null,
+    email: emailMedico ? emailMedico.value.trim() : null
   };
 
   try {

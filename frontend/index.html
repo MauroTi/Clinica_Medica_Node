@@ -38,6 +38,7 @@
       <button class="tab-btn" data-tab="consultas" type="button">Consultas</button>
     </nav>
 
+    <!-- ===================== PACIENTES ===================== -->
     <section id="tab-pacientes" class="tab-content active">
       <div class="section-header">
         <h2>👤 Pacientes</h2>
@@ -58,6 +59,16 @@
         <div class="form-group">
           <label for="telefonePaciente">Telefone</label>
           <input type="text" id="telefonePaciente" placeholder="Digite o telefone" required />
+        </div>
+
+        <div class="form-group">
+          <label for="cpfPaciente">CPF</label>
+          <input type="text" id="cpfPaciente" placeholder="Digite o CPF do paciente" />
+        </div>
+
+        <div class="form-group">
+          <label for="emailPaciente">Email</label>
+          <input type="email" id="emailPaciente" placeholder="Digite o email do paciente" />
         </div>
 
         <div class="form-actions">
@@ -92,6 +103,8 @@
               <th>Nome</th>
               <th>Idade</th>
               <th>Telefone</th>
+              <th>CPF</th>
+              <th>Email</th>
               <th>Ações</th>
             </tr>
           </thead>
@@ -106,6 +119,7 @@
       </div>
     </section>
 
+    <!-- ===================== MÉDICOS ===================== -->
     <section id="tab-medicos" class="tab-content">
       <div class="section-header">
         <h2>🩺 Médicos</h2>
@@ -121,6 +135,21 @@
         <div class="form-group">
           <label for="especialidadeMedico">Especialidade</label>
           <input type="text" id="especialidadeMedico" placeholder="Digite a especialidade" required />
+        </div>
+
+        <div class="form-group">
+          <label for="crmMedico">CRM</label>
+          <input type="text" id="crmMedico" placeholder="Digite o CRM do médico" />
+        </div>
+
+        <div class="form-group">
+          <label for="telefoneMedico">Telefone</label>
+          <input type="text" id="telefoneMedico" placeholder="Digite o telefone do médico" />
+        </div>
+
+        <div class="form-group">
+          <label for="emailMedico">Email</label>
+          <input type="email" id="emailMedico" placeholder="Digite o email do médico" />
         </div>
 
         <div class="form-actions">
@@ -154,6 +183,9 @@
             <tr>
               <th>Nome</th>
               <th>Especialidade</th>
+              <th>CRM</th>
+              <th>Telefone</th>
+              <th>Email</th>
               <th>Ações</th>
             </tr>
           </thead>
@@ -168,6 +200,7 @@
       </div>
     </section>
 
+    <!-- ===================== CONSULTAS ===================== -->
     <section id="tab-consultas" class="tab-content">
       <div class="section-header">
         <h2>📅 Consultas</h2>
