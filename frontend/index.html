@@ -1,301 +1,406 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Clínica Médica</title>
-  <link rel="stylesheet" href="./css/style.css" />
-</head>
-<body>
-  <div class="container">
-    <header class="topo">
-      <h1>🏥 Sistema de Clínica Médica</h1>
-      <p class="subtitulo">Cadastro, consultas, busca e gerenciamento profissional</p>
-    </header>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Clínica Médica</title>
+    <link rel="stylesheet" href="./css/style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header class="topo">
+        <h1>🏥 Sistema de Clínica Médica</h1>
+        <p class="subtitulo">
+          Cadastro, consultas, busca e gerenciamento profissional
+        </p>
+      </header>
 
-    <section class="dashboard dashboard-home">
-      <div class="card-dashboard">
-        <span class="card-label">Pacientes</span>
-        <strong id="totalPacientes">0</strong>
-      </div>
-      <div class="card-dashboard">
-        <span class="card-label">Médicos</span>
-        <strong id="totalMedicos">0</strong>
-      </div>
-      <div class="card-dashboard">
-        <span class="card-label">Consultas</span>
-        <strong id="totalConsultas">0</strong>
-      </div>
-    </section>
+      <section class="dashboard dashboard-home">
+        <div class="card-dashboard">
+          <span class="card-label">Pacientes</span>
+          <strong id="totalPacientes">0</strong>
+        </div>
+        <div class="card-dashboard">
+          <span class="card-label">Médicos</span>
+          <strong id="totalMedicos">0</strong>
+        </div>
+        <div class="card-dashboard">
+          <span class="card-label">Consultas</span>
+          <strong id="totalConsultas">0</strong>
+        </div>
+      </section>
 
-    <div class="acoes-topo">
-      <a href="./dashboard.html" class="btn-dashboard-link">📊 Abrir Dashboard Completo</a>
+      <div class="acoes-topo">
+        <a href="./dashboard.html" class="btn-dashboard-link"
+          >📊 Abrir Dashboard Completo</a
+        >
+      </div>
+
+      <nav class="tabs">
+        <button class="tab-btn active" data-tab="pacientes" type="button">
+          Pacientes
+        </button>
+        <button class="tab-btn" data-tab="medicos" type="button">
+          Médicos
+        </button>
+        <button class="tab-btn" data-tab="consultas" type="button">
+          Consultas
+        </button>
+      </nav>
+
+      <!-- ===================== PACIENTES ===================== -->
+      <section id="tab-pacientes" class="tab-content active">
+        <div class="section-header">
+          <h2>👤 Pacientes</h2>
+          <span class="modo-badge" id="modoPaciente">Modo: Cadastro</span>
+        </div>
+
+        <form id="formPaciente" class="form-grid">
+          <div class="form-group">
+            <label for="nomePaciente">Nome do paciente</label>
+            <input
+              type="text"
+              id="nomePaciente"
+              placeholder="Digite o nome do paciente"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="idadePaciente">Idade</label>
+            <input
+              type="number"
+              id="idadePaciente"
+              placeholder="Digite a idade"
+              required
+              min="0"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="telefonePaciente">Telefone</label>
+            <input
+              type="text"
+              id="telefonePaciente"
+              placeholder="Digite o telefone"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="cpfPaciente">CPF</label>
+            <input
+              type="text"
+              id="cpfPaciente"
+              placeholder="Digite o CPF do paciente"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="emailPaciente">Email</label>
+            <input
+              type="email"
+              id="emailPaciente"
+              placeholder="Digite o email do paciente"
+            />
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" id="btnSalvarPaciente">
+              Salvar paciente
+            </button>
+            <button
+              type="button"
+              class="btn-secundario hidden"
+              id="btnCancelarEdicaoPaciente"
+            >
+              Cancelar edição
+            </button>
+          </div>
+        </form>
+
+        <div class="toolbar">
+          <div class="toolbar-group">
+            <label for="buscaPaciente" class="sr-only">Buscar pacientes</label>
+            <input
+              type="text"
+              id="buscaPaciente"
+              placeholder="Buscar por nome ou telefone..."
+            />
+          </div>
+
+          <div class="toolbar-group">
+            <label for="ordenacaoPaciente" class="sr-only"
+              >Ordenar pacientes</label
+            >
+            <select id="ordenacaoPaciente">
+              <option value="nome-asc">Nome (A-Z)</option>
+              <option value="nome-desc">Nome (Z-A)</option>
+              <option value="idade-asc">Idade (menor → maior)</option>
+              <option value="idade-desc">Idade (maior → menor)</option>
+            </select>
+          </div>
+
+          <button type="button" class="btn-limpar" id="limparFiltroPaciente">
+            Limpar filtros
+          </button>
+        </div>
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Idade</th>
+                <th>Telefone</th>
+                <th>CPF</th>
+                <th>Email</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="listaPacientes"></tbody>
+          </table>
+        </div>
+
+        <div class="paginacao">
+          <button type="button" id="btnAnteriorPacientes">Anterior</button>
+          <span id="paginaInfoPacientes">Página 1 de 1</span>
+          <button type="button" id="btnProximaPacientes">Próxima</button>
+        </div>
+      </section>
+
+      <!-- ===================== MÉDICOS ===================== -->
+      <section id="tab-medicos" class="tab-content">
+        <div class="section-header">
+          <h2>🩺 Médicos</h2>
+          <span class="modo-badge" id="modoMedico">Modo: Cadastro</span>
+        </div>
+
+        <form id="formMedico" class="form-grid">
+          <div class="form-group">
+            <label for="nomeMedico">Nome do médico</label>
+            <input
+              type="text"
+              id="nomeMedico"
+              placeholder="Digite o nome do médico"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="especialidadeMedico">Especialidade</label>
+            <input
+              type="text"
+              id="especialidadeMedico"
+              placeholder="Digite a especialidade"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="crmMedico">CRM</label>
+            <input
+              type="text"
+              id="crmMedico"
+              placeholder="Digite o CRM do médico"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="telefoneMedico">Telefone</label>
+            <input
+              type="text"
+              id="telefoneMedico"
+              placeholder="Digite o telefone do médico"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="emailMedico">Email</label>
+            <input
+              type="email"
+              id="emailMedico"
+              placeholder="Digite o email do médico"
+            />
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" id="btnSalvarMedico">Salvar médico</button>
+            <button
+              type="button"
+              class="btn-secundario hidden"
+              id="btnCancelarEdicaoMedico"
+            >
+              Cancelar edição
+            </button>
+          </div>
+        </form>
+
+        <div class="toolbar">
+          <div class="toolbar-group">
+            <label for="buscaMedico" class="sr-only">Buscar médicos</label>
+            <input
+              type="text"
+              id="buscaMedico"
+              placeholder="Buscar por nome ou especialidade..."
+            />
+          </div>
+
+          <div class="toolbar-group">
+            <label for="ordenacaoMedico" class="sr-only">Ordenar médicos</label>
+            <select id="ordenacaoMedico">
+              <option value="nome-asc">Nome (A-Z)</option>
+              <option value="nome-desc">Nome (Z-A)</option>
+              <option value="esp-asc">Especialidade (A-Z)</option>
+              <option value="esp-desc">Especialidade (Z-A)</option>
+            </select>
+          </div>
+
+          <button type="button" class="btn-limpar" id="limparFiltroMedico">
+            Limpar filtros
+          </button>
+        </div>
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Especialidade</th>
+                <th>CRM</th>
+                <th>Telefone</th>
+                <th>Email</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="listaMedicos"></tbody>
+          </table>
+        </div>
+
+        <div class="paginacao">
+          <button type="button" id="btnAnteriorMedicos">Anterior</button>
+          <span id="paginaInfoMedicos">Página 1 de 1</span>
+          <button type="button" id="btnProximaMedicos">Próxima</button>
+        </div>
+      </section>
+
+      <!-- ===================== CONSULTAS ===================== -->
+      <section id="tab-consultas" class="tab-content">
+        <div class="section-header">
+          <h2>📅 Consultas</h2>
+          <span class="modo-badge" id="modoConsulta">Modo: Cadastro</span>
+        </div>
+
+        <form id="formConsulta" class="form-grid">
+          <div class="form-group">
+            <label for="pacienteConsulta">Paciente</label>
+            <select id="pacienteConsulta" required>
+              <option value="">Selecione o paciente</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="medicoConsulta">Médico</label>
+            <select id="medicoConsulta" required>
+              <option value="">Selecione o médico</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="dataConsulta">Data da consulta</label>
+            <input type="date" id="dataConsulta" required />
+          </div>
+
+          <div class="form-group">
+            <label for="descricaoConsulta">Descrição da consulta</label>
+            <input
+              type="text"
+              id="descricaoConsulta"
+              placeholder="Digite a descrição da consulta"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="statusConsulta">Status</label>
+            <select id="statusConsulta" required>
+              <option value="">Selecione o status</option>
+              <option value="agendada">Agendada</option>
+              <option value="pendente">Pendente</option>
+              <option value="confirmada">Confirmada</option>
+              <option value="realizada">Realizada</option>
+              <option value="cancelada">Cancelada</option>
+            </select>
+          </div>
+
+          <div class="form-actions form-actions-consulta">
+            <button type="submit" id="btnSalvarConsulta">
+              Salvar consulta
+            </button>
+            <button
+              type="button"
+              class="btn-secundario hidden"
+              id="btnCancelarEdicaoConsulta"
+            >
+              Cancelar edição
+            </button>
+          </div>
+        </form>
+
+        <div class="toolbar">
+          <div class="toolbar-group">
+            <label for="buscaConsulta" class="sr-only">Buscar consultas</label>
+            <input
+              type="text"
+              id="buscaConsulta"
+              placeholder="Buscar por paciente, médico ou descrição..."
+            />
+          </div>
+
+          <div class="toolbar-group">
+            <label for="ordenacaoConsulta" class="sr-only"
+              >Ordenar consultas</label
+            >
+            <select id="ordenacaoConsulta">
+              <option value="data-asc">Data (mais antiga → mais nova)</option>
+              <option value="data-desc">Data (mais nova → mais antiga)</option>
+              <option value="paciente-asc">Paciente (A-Z)</option>
+              <option value="medico-asc">Médico (A-Z)</option>
+            </select>
+          </div>
+
+          <button type="button" class="btn-limpar" id="limparFiltroConsulta">
+            Limpar filtros
+          </button>
+        </div>
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Paciente</th>
+                <th>Médico</th>
+                <th>Data</th>
+                <th>Especialidade</th>
+                <th>Descrição</th>
+                <th>Status</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="listaConsultas"></tbody>
+          </table>
+        </div>
+
+        <div class="paginacao">
+          <button type="button" id="btnAnteriorConsultas">Anterior</button>
+          <span id="paginaInfoConsultas">Página 1 de 1</span>
+          <button type="button" id="btnProximaConsultas">Próxima</button>
+        </div>
+      </section>
     </div>
 
-    <nav class="tabs">
-      <button class="tab-btn active" data-tab="pacientes" type="button">Pacientes</button>
-      <button class="tab-btn" data-tab="medicos" type="button">Médicos</button>
-      <button class="tab-btn" data-tab="consultas" type="button">Consultas</button>
-    </nav>
+    <div id="toastContainer" class="toast-container"></div>
 
-    <!-- ===================== PACIENTES ===================== -->
-    <section id="tab-pacientes" class="tab-content active">
-      <div class="section-header">
-        <h2>👤 Pacientes</h2>
-        <span class="modo-badge" id="modoPaciente">Modo: Cadastro</span>
-      </div>
-
-      <form id="formPaciente" class="form-grid">
-        <div class="form-group">
-          <label for="nomePaciente">Nome do paciente</label>
-          <input type="text" id="nomePaciente" placeholder="Digite o nome do paciente" required />
-        </div>
-
-        <div class="form-group">
-          <label for="idadePaciente">Idade</label>
-          <input type="number" id="idadePaciente" placeholder="Digite a idade" required min="0" />
-        </div>
-
-        <div class="form-group">
-          <label for="telefonePaciente">Telefone</label>
-          <input type="text" id="telefonePaciente" placeholder="Digite o telefone" required />
-        </div>
-
-        <div class="form-group">
-          <label for="cpfPaciente">CPF</label>
-          <input type="text" id="cpfPaciente" placeholder="Digite o CPF do paciente" />
-        </div>
-
-        <div class="form-group">
-          <label for="emailPaciente">Email</label>
-          <input type="email" id="emailPaciente" placeholder="Digite o email do paciente" />
-        </div>
-
-        <div class="form-actions">
-          <button type="submit" id="btnSalvarPaciente">Salvar paciente</button>
-          <button type="button" class="btn-secundario hidden" id="btnCancelarEdicaoPaciente">Cancelar edição</button>
-        </div>
-      </form>
-
-      <div class="toolbar">
-        <div class="toolbar-group">
-          <label for="buscaPaciente" class="sr-only">Buscar pacientes</label>
-          <input type="text" id="buscaPaciente" placeholder="Buscar por nome ou telefone..." />
-        </div>
-
-        <div class="toolbar-group">
-          <label for="ordenacaoPaciente" class="sr-only">Ordenar pacientes</label>
-          <select id="ordenacaoPaciente">
-            <option value="nome-asc">Nome (A-Z)</option>
-            <option value="nome-desc">Nome (Z-A)</option>
-            <option value="idade-asc">Idade (menor → maior)</option>
-            <option value="idade-desc">Idade (maior → menor)</option>
-          </select>
-        </div>
-
-        <button type="button" class="btn-limpar" id="limparFiltroPaciente">Limpar filtros</button>
-      </div>
-
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>Nome</th>
-              <th>Idade</th>
-              <th>Telefone</th>
-              <th>CPF</th>
-              <th>Email</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody id="listaPacientes"></tbody>
-        </table>
-      </div>
-
-      <div class="paginacao">
-        <button type="button" id="btnAnteriorPacientes">Anterior</button>
-        <span id="paginaInfoPacientes">Página 1 de 1</span>
-        <button type="button" id="btnProximaPacientes">Próxima</button>
-      </div>
-    </section>
-
-    <!-- ===================== MÉDICOS ===================== -->
-    <section id="tab-medicos" class="tab-content">
-      <div class="section-header">
-        <h2>🩺 Médicos</h2>
-        <span class="modo-badge" id="modoMedico">Modo: Cadastro</span>
-      </div>
-
-      <form id="formMedico" class="form-grid">
-        <div class="form-group">
-          <label for="nomeMedico">Nome do médico</label>
-          <input type="text" id="nomeMedico" placeholder="Digite o nome do médico" required />
-        </div>
-
-        <div class="form-group">
-          <label for="especialidadeMedico">Especialidade</label>
-          <input type="text" id="especialidadeMedico" placeholder="Digite a especialidade" required />
-        </div>
-
-        <div class="form-group">
-          <label for="crmMedico">CRM</label>
-          <input type="text" id="crmMedico" placeholder="Digite o CRM do médico" />
-        </div>
-
-        <div class="form-group">
-          <label for="telefoneMedico">Telefone</label>
-          <input type="text" id="telefoneMedico" placeholder="Digite o telefone do médico" />
-        </div>
-
-        <div class="form-group">
-          <label for="emailMedico">Email</label>
-          <input type="email" id="emailMedico" placeholder="Digite o email do médico" />
-        </div>
-
-        <div class="form-actions">
-          <button type="submit" id="btnSalvarMedico">Salvar médico</button>
-          <button type="button" class="btn-secundario hidden" id="btnCancelarEdicaoMedico">Cancelar edição</button>
-        </div>
-      </form>
-
-      <div class="toolbar">
-        <div class="toolbar-group">
-          <label for="buscaMedico" class="sr-only">Buscar médicos</label>
-          <input type="text" id="buscaMedico" placeholder="Buscar por nome ou especialidade..." />
-        </div>
-
-        <div class="toolbar-group">
-          <label for="ordenacaoMedico" class="sr-only">Ordenar médicos</label>
-          <select id="ordenacaoMedico">
-            <option value="nome-asc">Nome (A-Z)</option>
-            <option value="nome-desc">Nome (Z-A)</option>
-            <option value="esp-asc">Especialidade (A-Z)</option>
-            <option value="esp-desc">Especialidade (Z-A)</option>
-          </select>
-        </div>
-
-        <button type="button" class="btn-limpar" id="limparFiltroMedico">Limpar filtros</button>
-      </div>
-
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>Nome</th>
-              <th>Especialidade</th>
-              <th>CRM</th>
-              <th>Telefone</th>
-              <th>Email</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody id="listaMedicos"></tbody>
-        </table>
-      </div>
-
-      <div class="paginacao">
-        <button type="button" id="btnAnteriorMedicos">Anterior</button>
-        <span id="paginaInfoMedicos">Página 1 de 1</span>
-        <button type="button" id="btnProximaMedicos">Próxima</button>
-      </div>
-    </section>
-
-    <!-- ===================== CONSULTAS ===================== -->
-    <section id="tab-consultas" class="tab-content">
-      <div class="section-header">
-        <h2>📅 Consultas</h2>
-        <span class="modo-badge" id="modoConsulta">Modo: Cadastro</span>
-      </div>
-
-      <form id="formConsulta" class="form-grid">
-        <div class="form-group">
-          <label for="pacienteConsulta">Paciente</label>
-          <select id="pacienteConsulta" required>
-            <option value="">Selecione o paciente</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="medicoConsulta">Médico</label>
-          <select id="medicoConsulta" required>
-            <option value="">Selecione o médico</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="dataConsulta">Data da consulta</label>
-          <input type="date" id="dataConsulta" required />
-        </div>
-
-        <div class="form-group">
-          <label for="descricaoConsulta">Descrição da consulta</label>
-          <input type="text" id="descricaoConsulta" placeholder="Digite a descrição da consulta" required />
-        </div>
-
-        <div class="form-group">
-          <label for="statusConsulta">Status</label>
-          <select id="statusConsulta" required>
-            <option value="">Selecione o status</option>
-            <option value="agendada">Agendada</option>
-            <option value="pendente">Pendente</option>
-            <option value="confirmada">Confirmada</option>
-            <option value="realizada">Realizada</option>
-            <option value="cancelada">Cancelada</option>
-          </select>
-        </div>
-
-        <div class="form-actions form-actions-consulta">
-          <button type="submit" id="btnSalvarConsulta">Salvar consulta</button>
-          <button type="button" class="btn-secundario hidden" id="btnCancelarEdicaoConsulta">Cancelar edição</button>
-        </div>
-      </form>
-
-      <div class="toolbar">
-        <div class="toolbar-group">
-          <label for="buscaConsulta" class="sr-only">Buscar consultas</label>
-          <input type="text" id="buscaConsulta" placeholder="Buscar por paciente, médico ou descrição..." />
-        </div>
-
-        <div class="toolbar-group">
-          <label for="ordenacaoConsulta" class="sr-only">Ordenar consultas</label>
-          <select id="ordenacaoConsulta">
-            <option value="data-asc">Data (mais antiga → mais nova)</option>
-            <option value="data-desc">Data (mais nova → mais antiga)</option>
-            <option value="paciente-asc">Paciente (A-Z)</option>
-            <option value="medico-asc">Médico (A-Z)</option>
-          </select>
-        </div>
-
-        <button type="button" class="btn-limpar" id="limparFiltroConsulta">Limpar filtros</button>
-      </div>
-
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>Paciente</th>
-              <th>Médico</th>
-              <th>Data</th>
-              <th>Especialidade</th>
-              <th>Descrição</th>
-              <th>Status</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody id="listaConsultas"></tbody>
-        </table>
-      </div>
-
-      <div class="paginacao">
-        <button type="button" id="btnAnteriorConsultas">Anterior</button>
-        <span id="paginaInfoConsultas">Página 1 de 1</span>
-        <button type="button" id="btnProximaConsultas">Próxima</button>
-      </div>
-    </section>
-  </div>
-
-  <div id="toastContainer" class="toast-container"></div>
-
-  <script type="module" src="./js/app.js"></script>
-</body>
+    <script type="module" src="./js/app.js"></script>
+  </body>
 </html>

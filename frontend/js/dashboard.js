@@ -1,15 +1,15 @@
-const API_BASE = 'http://localhost:3000/api';
+const API_BASE = "http://localhost:3000/api";
 
-const CORES = ['#2563eb', '#16a34a', '#f59e0b'];
+const CORES = ["#2563eb", "#16a34a", "#f59e0b"];
 
 const elementos = {
-  totalPacientes: document.getElementById('dashTotalPacientes'),
-  totalMedicos: document.getElementById('dashTotalMedicos'),
-  totalConsultas: document.getElementById('dashTotalConsultas'),
-  mediaConsultas: document.getElementById('dashMediaConsultas'),
-  canvas: document.getElementById('graficoPizza'),
-  legenda: document.getElementById('legendaGrafico'),
-  tooltip: document.getElementById('tooltipGrafico')
+  totalPacientes: document.getElementById("dashTotalPacientes"),
+  totalMedicos: document.getElementById("dashTotalMedicos"),
+  totalConsultas: document.getElementById("dashTotalConsultas"),
+  mediaConsultas: document.getElementById("dashMediaConsultas"),
+  canvas: document.getElementById("graficoPizza"),
+  legenda: document.getElementById("legendaGrafico"),
+  tooltip: document.getElementById("tooltipGrafico"),
 };
 
 const estado = {
@@ -17,8 +17,8 @@ const estado = {
   totais: {
     pacientes: 0,
     medicos: 0,
-    consultas: 0
-  }
+    consultas: 0,
+  },
 };
 
 async function apiGet(endpoint) {
@@ -26,7 +26,7 @@ async function apiGet(endpoint) {
   const data = await response.json();
 
   if (!response.ok) {
-    throw new Error(data?.mensagem || data?.erro || 'Erro ao buscar dados');
+    throw new Error(data?.mensagem || data?.erro || "Erro ao buscar dados");
   }
 
   return data;
@@ -38,15 +38,15 @@ function atualizarCards() {
   elementos.totalMedicos.textContent = medicos;
   elementos.totalConsultas.textContent = consultas;
 
-  const media = pacientes > 0 ? (consultas / pacientes).toFixed(2) : '0.00';
+  const media = pacientes > 0 ? (consultas / pacientes).toFixed(2) : "0.00";
   elementos.mediaConsultas.textContent = media;
 }
 
 function montarFatias() {
   const dados = [
-    { label: 'Pacientes', valor: estado.totais.pacientes, cor: CORES[0] },
-    { label: 'Médicos', valor: estado.totais.medicos, cor: CORES[1] },
-    { label: 'Consultas', valor: estado.totais.consultas, cor: CORES[2] }
+    { label: "Pacientes", valor: estado.totais.pacientes, cor: CORES[0] },
+    { label: "Médicos", valor: estado.totais.medicos, cor: CORES[1] },
+    { label: "Consultas", valor: estado.totais.consultas, cor: CORES[2] },
   ];
 
   const total = dados.reduce((acc, item) => acc + item.valor, 0);
@@ -60,7 +60,7 @@ function montarFatias() {
       ...item,
       percentual,
       inicio: anguloAtual,
-      fim: anguloAtual + angulo
+      fim: anguloAtual + angulo,
     };
 
     anguloAtual += angulo;
@@ -69,11 +69,11 @@ function montarFatias() {
 }
 
 function renderizarLegenda() {
-  elementos.legenda.innerHTML = '';
+  elementos.legenda.innerHTML = "";
 
   estado.fatias.forEach((fatia) => {
-    const li = document.createElement('li');
-    li.className = 'legenda-item';
+    const li = document.createElement("li");
+    li.className = "legenda-item";
     li.innerHTML = `
       <span class="legenda-cor" style="background:${fatia.cor}"></span>
       <div class="legenda-texto">
@@ -86,7 +86,7 @@ function renderizarLegenda() {
 }
 
 function desenharGrafico(indiceHover = -1) {
-  const ctx = elementos.canvas.getContext('2d');
+  const ctx = elementos.canvas.getContext("2d");
   const largura = elementos.canvas.width;
   const altura = elementos.canvas.height;
   const cx = largura / 2;
@@ -98,13 +98,13 @@ function desenharGrafico(indiceHover = -1) {
   if (!estado.fatias.some((f) => f.valor > 0)) {
     ctx.beginPath();
     ctx.arc(cx, cy, raio, 0, Math.PI * 2);
-    ctx.fillStyle = '#e5e7eb';
+    ctx.fillStyle = "#e5e7eb";
     ctx.fill();
 
-    ctx.fillStyle = '#475569';
-    ctx.font = 'bold 18px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('Sem dados', cx, cy + 6);
+    ctx.fillStyle = "#475569";
+    ctx.font = "bold 18px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText("Sem dados", cx, cy + 6);
     return;
   }
 
@@ -120,21 +120,25 @@ function desenharGrafico(indiceHover = -1) {
     ctx.fill();
 
     ctx.lineWidth = 3;
-    ctx.strokeStyle = '#ffffff';
+    ctx.strokeStyle = "#ffffff";
     ctx.stroke();
   });
 
   ctx.beginPath();
   ctx.arc(cx, cy, 58, 0, Math.PI * 2);
-  ctx.fillStyle = '#ffffff';
+  ctx.fillStyle = "#ffffff";
   ctx.fill();
 
-  ctx.fillStyle = '#0f172a';
-  ctx.textAlign = 'center';
-  ctx.font = 'bold 16px Arial';
-  ctx.fillText('Total', cx, cy - 6);
-  ctx.font = 'bold 22px Arial';
-  ctx.fillText(String(estado.fatias.reduce((acc, item) => acc + item.valor, 0)), cx, cy + 22);
+  ctx.fillStyle = "#0f172a";
+  ctx.textAlign = "center";
+  ctx.font = "bold 16px Arial";
+  ctx.fillText("Total", cx, cy - 6);
+  ctx.font = "bold 22px Arial";
+  ctx.fillText(
+    String(estado.fatias.reduce((acc, item) => acc + item.valor, 0)),
+    cx,
+    cy + 22,
+  );
 }
 
 function obterFatiaPorPosicao(event) {
@@ -159,16 +163,18 @@ function obterFatiaPorPosicao(event) {
     angulo += Math.PI * 2;
   }
 
-  const indice = estado.fatias.findIndex((fatia) => angulo >= fatia.inicio && angulo <= fatia.fim);
+  const indice = estado.fatias.findIndex(
+    (fatia) => angulo >= fatia.inicio && angulo <= fatia.fim,
+  );
 
   return {
     indice,
-    fatia: indice >= 0 ? estado.fatias[indice] : null
+    fatia: indice >= 0 ? estado.fatias[indice] : null,
   };
 }
 
 function esconderTooltip() {
-  elementos.tooltip.classList.add('hidden');
+  elementos.tooltip.classList.add("hidden");
 }
 
 function mostrarTooltip(event, fatia) {
@@ -184,11 +190,11 @@ function mostrarTooltip(event, fatia) {
 
   elementos.tooltip.style.left = `${offsetX + 18}px`;
   elementos.tooltip.style.top = `${offsetY + 18}px`;
-  elementos.tooltip.classList.remove('hidden');
+  elementos.tooltip.classList.remove("hidden");
 }
 
 function configurarEventosGrafico() {
-  elementos.canvas.addEventListener('mousemove', (event) => {
+  elementos.canvas.addEventListener("mousemove", (event) => {
     const { indice, fatia } = obterFatiaPorPosicao(event);
 
     if (!fatia) {
@@ -201,7 +207,7 @@ function configurarEventosGrafico() {
     mostrarTooltip(event, fatia);
   });
 
-  elementos.canvas.addEventListener('mouseleave', () => {
+  elementos.canvas.addEventListener("mouseleave", () => {
     desenharGrafico();
     esconderTooltip();
   });
@@ -210,9 +216,9 @@ function configurarEventosGrafico() {
 async function inicializarDashboard() {
   try {
     const [pacientes, medicos, consultas] = await Promise.all([
-      apiGet('/pacientes'),
-      apiGet('/medicos'),
-      apiGet('/consultas')
+      apiGet("/pacientes"),
+      apiGet("/medicos"),
+      apiGet("/consultas"),
     ]);
 
     estado.totais.pacientes = pacientes.length;

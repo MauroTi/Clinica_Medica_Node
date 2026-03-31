@@ -1,23 +1,23 @@
-import { inicializarPacientes } from './pacientes.js';
-import { inicializarMedicos } from './medicos.js';
-import { inicializarConsultas } from './consultas.js';
+import { inicializarPacientes } from "./pacientes.js";
+import { inicializarMedicos } from "./medicos.js";
+import { inicializarConsultas } from "./consultas.js";
 
 function inicializarAbas() {
-  const botoesAbas = document.querySelectorAll('.aba-btn');
-  const conteudos = document.querySelectorAll('.aba-conteudo');
+  const botoesAbas = document.querySelectorAll(".aba-btn");
+  const conteudos = document.querySelectorAll(".aba-conteudo");
 
   botoesAbas.forEach((botao) => {
-    botao.addEventListener('click', () => {
+    botao.addEventListener("click", () => {
       const abaAlvo = botao.dataset.aba;
 
-      botoesAbas.forEach((b) => b.classList.remove('ativa'));
-      conteudos.forEach((c) => c.classList.remove('ativa'));
+      botoesAbas.forEach((b) => b.classList.remove("ativa"));
+      conteudos.forEach((c) => c.classList.remove("ativa"));
 
-      botao.classList.add('ativa');
+      botao.classList.add("ativa");
 
       const conteudoAlvo = document.getElementById(`aba-${abaAlvo}`);
       if (conteudoAlvo) {
-        conteudoAlvo.classList.add('ativa');
+        conteudoAlvo.classList.add("ativa");
       }
     });
   });
@@ -30,4 +30,4 @@ function inicializarApp() {
   inicializarConsultas();
 }
 
-document.addEventListener('DOMContentLoaded', inicializarApp);
+document.addEventListener("DOMContentLoaded", inicializarApp);

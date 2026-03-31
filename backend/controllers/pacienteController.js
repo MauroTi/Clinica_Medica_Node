@@ -3,8 +3,8 @@ import {
   buscarPacientePorId,
   criarPaciente,
   atualizarPaciente,
-  deletarPaciente
-} from '../models/pacienteModel.js';
+  deletarPaciente,
+} from "../models/pacienteModel.js";
 
 export async function getPacientes(req, res, next) {
   try {
@@ -21,7 +21,7 @@ export async function getPacientePorId(req, res, next) {
     const paciente = await buscarPacientePorId(id);
 
     if (!paciente) {
-      return res.status(404).json({ mensagem: 'Paciente não encontrado' });
+      return res.status(404).json({ mensagem: "Paciente não encontrado" });
     }
 
     res.status(200).json(paciente);
@@ -36,7 +36,7 @@ export async function postPaciente(req, res, next) {
 
     if (!nome || idade === undefined || !telefone || !email) {
       return res.status(400).json({
-        mensagem: 'Nome, idade, telefone e email são obrigatórios'
+        mensagem: "Nome, idade, telefone e email são obrigatórios",
       });
     }
 
@@ -54,14 +54,21 @@ export async function putPaciente(req, res, next) {
 
     if (!nome || idade === undefined || !telefone || !email) {
       return res.status(400).json({
-        mensagem: 'Nome, idade, telefone e email são obrigatórios'
+        mensagem: "Nome, idade, telefone e email são obrigatórios",
       });
     }
 
-    const afetados = await atualizarPaciente(id, nome, idade, telefone, cpf, email);
+    const afetados = await atualizarPaciente(
+      id,
+      nome,
+      idade,
+      telefone,
+      cpf,
+      email,
+    );
 
     if (afetados === 0) {
-      return res.status(404).json({ mensagem: 'Paciente não encontrado' });
+      return res.status(404).json({ mensagem: "Paciente não encontrado" });
     }
 
     const pacienteAtualizado = await buscarPacientePorId(id);
@@ -78,11 +85,12 @@ export async function deletePaciente(req, res, next) {
     const afetados = await deletarPaciente(id);
 
     if (afetados === 0) {
-      return res.status(404).json({ mensagem: 'Paciente não encontrado' });
+      return res.status(404).json({ mensagem: "Paciente não encontrado" });
     }
 
     res.status(200).json({
-      mensagem: 'Paciente excluído com sucesso. Consultas vinculadas foram removidas automaticamente.'
+      mensagem:
+        "Paciente excluído com sucesso. Consultas vinculadas foram removidas automaticamente.",
     });
   } catch (error) {
     next(error);

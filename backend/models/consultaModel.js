@@ -1,4 +1,4 @@
-import db from '../../config/db.js';
+import db from "../../config/db.js";
 
 export async function listarConsultas() {
   const [rows] = await db.execute(`
@@ -32,7 +32,8 @@ export async function listarConsultas() {
 }
 
 export async function buscarConsultaPorId(id) {
-  const [rows] = await db.execute(`
+  const [rows] = await db.execute(
+    `
     SELECT 
       c.id,
       c.paciente_id,
@@ -57,24 +58,56 @@ export async function buscarConsultaPorId(id) {
     INNER JOIN pacientes p ON c.paciente_id = p.id
     INNER JOIN medicos m ON c.medico_id = m.id
     WHERE c.id = ?
-  `, [id]);
+  `,
+    [id],
+  );
 
   return rows[0] || null;
 }
 
-export async function criarConsulta(paciente_id, medico_id, data_consulta, descricao, status = 'agendada', observacao_status = null) {
+export async function criarConsulta(
+  paciente_id,
+  medico_id,
+  data_consulta,
+  descricao,
+  status = "agendada",
+  observacao_status = null,
+) {
   const [result] = await db.execute(
-    'INSERT INTO consultas (paciente_id, medico_id, data_consulta, descricao, status, observacao_status) VALUES (?, ?, ?, ?, ?, ?)',
-    [paciente_id, medico_id, data_consulta, descricao ?? null, status, observacao_status ?? null]
+    "INSERT INTO consultas (paciente_id, medico_id, data_consulta, descricao, status, observacao_status) VALUES (?, ?, ?, ?, ?, ?)",
+    [
+      paciente_id,
+      medico_id,
+      data_consulta,
+      descricao ?? null,
+      status,
+      observacao_status ?? null,
+    ],
   );
 
   return buscarConsultaPorId(result.insertId);
 }
 
-export async function atualizarConsulta(id, paciente_id, medico_id, data_consulta, descricao, status = 'agendada', observacao_status = null) {
+export async function atualizarConsulta(
+  id,
+  paciente_id,
+  medico_id,
+  data_consulta,
+  descricao,
+  status = "agendada",
+  observacao_status = null,
+) {
   const [result] = await db.execute(
-    'UPDATE consultas SET paciente_id = ?, medico_id = ?, data_consulta = ?, descricao = ?, status = ?, observacao_status = ? WHERE id = ?',
-    [paciente_id, medico_id, data_consulta, descricao ?? null, status, observacao_status ?? null, id]
+    "UPDATE consultas SET paciente_id = ?, medico_id = ?, data_consulta = ?, descricao = ?, status = ?, observacao_status = ? WHERE id = ?",
+    [
+      paciente_id,
+      medico_id,
+      data_consulta,
+      descricao ?? null,
+      status,
+      observacao_status ?? null,
+      id,
+    ],
   );
 
   if (result.affectedRows === 0) {
@@ -85,10 +118,7 @@ export async function atualizarConsulta(id, paciente_id, medico_id, data_consult
 }
 
 export async function deletarConsulta(id) {
-  const [result] = await db.execute(
-    'DELETE FROM consultas WHERE id = ?',
-    [id]
-  );
+  const [result] = await db.execute("DELETE FROM consultas WHERE id = ?", [id]);
 
   return result.affectedRows > 0;
 }

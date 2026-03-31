@@ -4,7 +4,7 @@ import {
   criarMedico,
   atualizarMedico,
   deletarMedico,
-} from '../models/medicoModel.js';
+} from "../models/medicoModel.js";
 
 export async function getMedicos(req, res, next) {
   try {
@@ -22,7 +22,7 @@ export async function getMedicoPorId(req, res, next) {
     const medico = await buscarMedicoPorId(id);
 
     if (!medico) {
-      return res.status(404).json({ mensagem: 'Médico não encontrado.' });
+      return res.status(404).json({ mensagem: "Médico não encontrado." });
     }
 
     return res.status(200).json(medico);
@@ -37,14 +37,20 @@ export async function postMedico(req, res, next) {
 
     if (!nome || !especialidade) {
       return res.status(400).json({
-        mensagem: 'Os campos nome e especialidade são obrigatórios.',
+        mensagem: "Os campos nome e especialidade são obrigatórios.",
       });
     }
 
-    const novoMedico = await criarMedico(nome, especialidade, crm, email, telefone);
+    const novoMedico = await criarMedico(
+      nome,
+      especialidade,
+      crm,
+      email,
+      telefone,
+    );
 
     return res.status(201).json({
-      mensagem: 'Médico cadastrado com sucesso.',
+      mensagem: "Médico cadastrado com sucesso.",
       medico: novoMedico,
     });
   } catch (error) {
@@ -59,18 +65,25 @@ export async function putMedico(req, res, next) {
 
     if (!nome || !especialidade) {
       return res.status(400).json({
-        mensagem: 'Os campos nome e especialidade são obrigatórios.',
+        mensagem: "Os campos nome e especialidade são obrigatórios.",
       });
     }
 
-    const medicoAtualizado = await atualizarMedico(id, nome, especialidade, crm, email, telefone);
+    const medicoAtualizado = await atualizarMedico(
+      id,
+      nome,
+      especialidade,
+      crm,
+      email,
+      telefone,
+    );
 
     if (!medicoAtualizado) {
-      return res.status(404).json({ mensagem: 'Médico não encontrado.' });
+      return res.status(404).json({ mensagem: "Médico não encontrado." });
     }
 
     return res.status(200).json({
-      mensagem: 'Médico atualizado com sucesso.',
+      mensagem: "Médico atualizado com sucesso.",
       medico: medicoAtualizado,
     });
   } catch (error) {
@@ -85,11 +98,11 @@ export async function deleteMedico(req, res, next) {
     const removido = await deletarMedico(id);
 
     if (!removido) {
-      return res.status(404).json({ mensagem: 'Médico não encontrado.' });
+      return res.status(404).json({ mensagem: "Médico não encontrado." });
     }
 
     return res.status(200).json({
-      mensagem: 'Médico excluído com sucesso.',
+      mensagem: "Médico excluído com sucesso.",
     });
   } catch (error) {
     next(error);
